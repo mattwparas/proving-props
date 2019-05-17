@@ -61,15 +61,6 @@
   )
 )
 
-
-
-  (for/list ([char-start (trie-children root-trie)]
-    (if (char=? char-start (first char-list))
-      (insert-helper char-start char-list index) ; start using the helper on that branch
-      (copy char-start) ; otherwise copy the branch all the way down
-      )
-  ))
-
 (define (pre-order-traverse trie-node)
   (displayln (trie-char trie-node))
   (map pre-order-traverse (trie-children trie-node))
