@@ -53,28 +53,24 @@
 (define (create-children char-list lst index)
   (cond [(= (length char-list) 1)
               (cond [(empty? lst) 
-              ;;; (displayln "empty lst, char 1")
                         (list (trie (first char-list) empty #t index))]
                     [(char<? (first char-list) (trie-char (first lst)))
-                    ;;; (displayln "char<, char 1") 
                         (cons (trie (first char-list) empty #t index) lst)]
                     [(char=? (first char-list) (trie-char (first lst)))
-                    ;;; (displayln "char=, char 1") 
                         (cons (trie (first char-list) (trie-children (first lst)) #t index) (rest lst))]
                     [else
-                    ;;; (displayln "move to next child, char 1") 
                         (cons (first lst)
                               (create-children char-list (rest lst) index))])]
         [else ;; you are in the middle of the word
-              (cond [(empty? lst) 
+              (cond [(empty? lst)
                         (list (trie (first char-list) (create-children 
                                                           (rest char-list) empty index) #f -1))]
                     [(char<? (first char-list) (trie-char (first lst)))
-                    ;;; (println "bopppppppp")
                         (cons (trie (first char-list) (create-children 
                                                           (rest char-list) empty index) #f -1) lst)]
                     [(char=? (first char-list) (trie-char (first lst)))
-                        (cons (trie (first char-list) (trie-children (first lst)) #f -1) (rest lst))]
+                        (cons (trie (first char-list) (create-children
+                                                          (rest char-list) (trie-children (first lst)) index) #f -1) (rest lst))]
                     [else
                         (cons (first lst)
                               (create-children char-list (rest lst) index))])]))
@@ -82,25 +78,20 @@
 ;; contract: trie string integer -> trie
 (define (insert root-trie word index)
   (define char-list (string->list word))
-  (displayln "Inserting word into trie")
-  (trie 
+  (trie
     (trie-char root-trie)
       (create-children char-list (trie-children root-trie) index)
       (trie-end-word? root-trie)
       (trie-index root-trie)))
-
 
 ;; contract: trie char -> bool
 (define (trie<=? trie1 char)
   (char<=? char (trie-char trie1)))
 
 
-;;; (define test-list (list #\a #\b #\d #\e))
-
-;;; (insert #\c test-list)
-
 (define (pre-order-traverse trie-node)
   (displayln (trie-char trie-node))
+  (displayln (trie-end-word? trie-node))
   (map pre-order-traverse (trie-children trie-node))
   "finished"
 )
@@ -113,8 +104,6 @@
     (map copy (trie-children trie-node))
     (trie-end-word? trie-node)
     (trie-index trie-node)))
-
-
 
 ;;; words in this test trie
 ;; bad, bat, bam, bet, bed, bell
@@ -137,7 +126,7 @@
                 (trie #\t empty #t -1)) 
           #f -1)) 
       #f -1)) 
-#t -1))
+#f -1))
 
 ;; trie after inserting the word "app"
 (define testtrie_after_insert
@@ -165,7 +154,31 @@
                 (trie #\t empty #t -1)) 
           #f -1)) 
       #f -1)) 
-#t -1))
+#f -1))
+
+;;; words in this test trie
+;; bad, bat, bam, bet, bed, bell
+(define testtrie_after_insert_be
+  (trie ; define the root 
+    void ; contains no character
+      (list
+        (trie #\b 
+          (list
+            (trie #\a 
+              (list
+                (trie #\d empty #t -1)
+                (trie #\m empty #t -1)
+                (trie #\t empty #t -1)) 
+              #f -1)
+            (trie #\e 
+              (list
+                (trie #\d empty #t -1)
+                (trie #\l (list (trie #\l empty #t -1)) #f -1)
+                (trie #\t empty #t -1)) 
+          #t -1)) 
+      #f -1)) 
+#f -1))
+
 
 ;;; (pre-order-traverse testtrie)
 
@@ -186,6 +199,10 @@
       "Words not in the trie are not found"
       (for/list ([word not-inserted-words])
         (check-false (lookup testtrie word))))
+
+    (test-case
+      "Looking up 'be' in the tree"
+      (check-true (lookup testtrie_after_insert_be "be")))
 ))
 
 
@@ -208,79 +225,19 @@
       (check-true (equal? copy-test-trie testtrie)))
 ))
 
- (pre-order-traverse testtrie_after_insert)
-  (pre-order-traverse (insert testtrie "app" -1))
+;;; debugging prints
+;;;  (pre-order-traverse testtrie_after_insert_be)
+;;;   (pre-order-traverse (insert testtrie "be" -1))
 
 (define insert-tests
   (test-suite
     "Tests for insert"
       (test-case
         "Insert 'app' into trie"
-          (check-true (equal? (insert testtrie "app" -1) testtrie_after_insert)))))
+          (check-true (equal? (insert testtrie "app" -1) testtrie_after_insert))
+          (check-true (equal? (insert testtrie "be" -1) testtrie_after_insert_be)))))
 
 (run-tests lookup-tests)
 (run-tests copy-lookup-tests)
 (run-tests insert-tests)
-
-;; ----------------------------------------- garbage?
-
-;;; (define file-tests
-;;;   (test-suite
-;;;    "Tests for file.rkt"
- 
-;;;    (check-equal? (+ 1 1) 2 "Simple addition")
- 
-;;;    (check-equal? (* 1 2) 2 "Simple multiplication")
- 
-;;;    (test-case
-;;;     "List has length 4 and all elements even"
-;;;     (let ([lst (list 2 4 6 8)])
-;;;       (check = (length lst) 4)
-;;;       (for-each
-;;;         (lambda (elt)
-;;;           (check-pred even? elt))
-;;;       lst)))))
-
-
-
-;; stub
-;;; (define (insert-helper trie char-list index)
-;;;   (cond
-;;;   [(not (char=? (first char-list) (trie-char trie-node))) 
-;;;     (copy trie-node)]
-;;;   []
-;;;   )
-;;;   #t)
-
-;;; ;; main function for insert
-;;; ;; takes the rooted trie and sets it on its path
-;;; (define (insert root-trie word index)
-;;;   (define char-list (string->list word))
-;;;   (trie
-;;;     (trie-char root-trie) ; should always be void
-;;;     (map (lambda (trie-node)
-;;;           (if (char=? (trie-char trie-node) (first char-list)
-;;;             (insert-helper trie-node char-list index) ; if the characters match, call helper
-;;;             (copy char-start)))) ; if the characters dont match, just copy the rest of that
-;;;           (trie-children root-trie)) ;; set up the children
-;;;     (trie-end-word? root-trie) ; should always be false
-;;;     (trie-index root-trie) ; should always be -1
-;;;   )
-;;; )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
