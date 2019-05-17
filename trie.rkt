@@ -18,7 +18,7 @@
 (define (lookup-helper trie-node char-list)
   (cond
   [(empty? char-list) #f] ; hit the case where its empty
-  [(not (char=? (first char-list) (trie-char trie-node))) #f]
+  [(not (char=? (first char-list) (trie-char trie-node))) #f] ; no match, false
   [(= (length char-list) 1) ; return if its an end word
     (trie-end-word? trie-node)] ; #t or #f here
   [else
@@ -27,9 +27,10 @@
       (lookup-helper i (rest char-list)))])) ; recur on the child which matches character
 
 (define (lookup root-trie word)
+  (define char-list (string->list word))
   (for/first ([i (trie-children root-trie)]
-    #:when (char=? (first (string->list word)) (trie-char i)))
-    (lookup-helper i (string->list word))))
+    #:when (char=? (first char-list) (trie-char i)))
+    (lookup-helper i char-list)))
   
 ;; copies the remainder of the trie from the given node
 (define (copy trie-node)
@@ -43,6 +44,11 @@
 
 ;; stub
 (define (insert-helper trie char-list index)
+  (cond
+  [(not (char=? (first char-list) (trie-char trie-node))) 
+    (copy trie-node)]
+  []
+  )
   #t)
 
 ;; main function for insert
@@ -60,6 +66,8 @@
     (trie-index root-trie) ; should always be -1
   )
 )
+
+;; need something because when its not a match we need to insert blah blah
 
 (define (pre-order-traverse trie-node)
   (displayln (trie-char trie-node))
