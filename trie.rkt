@@ -49,6 +49,11 @@
 (define (insert root-trie word index)
   #t)
 
+(define (pre-order-traverse trie-node)
+  (displayln (trie-char trie-node))
+  (map pre-order-traverse (trie-children trie-node))
+  "finished"
+)
 
 
 
@@ -78,6 +83,8 @@
         #f -1))
     #f -1)
 )
+
+(pre-order-traverse testtrie)
 
 (define inserted-words (list "bed" "bat" "bam" "bet" "bed" "bell"))
 (define not-inserted-words (list "apple" "tomato" "cucumber" "b" "a" "m" "c" "l" "d" "t"))
