@@ -36,40 +36,33 @@
       (lookup-helper i char-list))
     #f)) ;; otherwise return false
   
-;; contract: trie string integer -> trie
-(define (insert root-trie word index)
-  (define char-list (string->list word))
-  (trie 
-    (trie-char root-trie)
-      (create-children char-list (trie-children root-trie) index)
-      (trie-end-word? root-trie)
-      (trie-index root-trie)))
 
-;; contract: list-of-characters character -> list-of-characters
-(define (create-chars lst value) 
-  (cond [(empty? lst)          ; if the list is empty
-         (list value)]        ; then return a single-element list
-        [(char<=? value (first lst)) ; if current element >= value
-         (cons value lst)]   ; insert value in current position
-        [else                 ; otherwise keep building the list
-         (cons (first lst)      ; by adding current element
-               (create-chars value (rest lst)))])) ; and advancing recursion)
+
+;;; ;; contract: list-of-characters character -> list-of-characters
+;;; (define (create-chars lst value) 
+;;;   (cond [(empty? lst)          ; if the list is empty
+;;;          (list value)]        ; then return a single-element list
+;;;         [(char<=? value (first lst)) ; if current element >= value
+;;;          (cons value lst)]   ; insert value in current position
+;;;         [else                 ; otherwise keep building the list
+;;;          (cons (first lst)      ; by adding current element
+;;;                (create-chars value (rest lst)))])) ; and advancing recursion)
 
 ;;(struct trie (char children end-word? index))
 ;; contract: list-of-chars list-of-tries inte-> list-of-tries
 (define (create-children char-list lst index)
   (cond [(= (length char-list) 1)
               (cond [(empty? lst) 
-              (displayln "empty lst, char 1") 
+              ;;; (displayln "empty lst, char 1")
                         (list (trie (first char-list) empty #t index))]
                     [(char<? (first char-list) (trie-char (first lst)))
-                    (displayln "char<, char 1") 
+                    ;;; (displayln "char<, char 1") 
                         (cons (trie (first char-list) empty #t index) lst)]
                     [(char=? (first char-list) (trie-char (first lst)))
-                    (displayln "char=, char 1") 
+                    ;;; (displayln "char=, char 1") 
                         (cons (trie (first char-list) (trie-children (first lst)) #t index) (rest lst))]
                     [else
-                    (displayln "move to next child, char 1") 
+                    ;;; (displayln "move to next child, char 1") 
                         (cons (first lst)
                               (create-children char-list (rest lst) index))])]
         [else ;; you are in the middle of the word
@@ -77,7 +70,7 @@
                         (list (trie (first char-list) (create-children 
                                                           (rest char-list) empty index) #f -1))]
                     [(char<? (first char-list) (trie-char (first lst)))
-                    (println "bopppppppp")
+                    ;;; (println "bopppppppp")
                         (cons (trie (first char-list) (create-children 
                                                           (rest char-list) empty index) #f -1) lst)]
                     [(char=? (first char-list) (trie-char (first lst)))
@@ -85,6 +78,16 @@
                     [else
                         (cons (first lst)
                               (create-children char-list (rest lst) index))])]))
+
+;; contract: trie string integer -> trie
+(define (insert root-trie word index)
+  (define char-list (string->list word))
+  (displayln "Inserting word into trie")
+  (trie 
+    (trie-char root-trie)
+      (create-children char-list (trie-children root-trie) index)
+      (trie-end-word? root-trie)
+      (trie-index root-trie)))
 
 
 ;; contract: trie char -> bool
@@ -145,9 +148,8 @@
           (list 
             (trie #\p 
               (list 
-                (trie #\p empty #t -1)) #f -1)
+                (trie #\p empty #t -1)) #f -1))
             #f -1)
-          #f -1)
         (trie #\b 
           (list
             (trie #\a 
@@ -165,7 +167,7 @@
       #f -1)) 
 #t -1))
 
-(pre-order-traverse testtrie)
+;;; (pre-order-traverse testtrie)
 
 
 (define inserted-words (list "bed" "bat" "bam" "bet" "bed" "bell"))
