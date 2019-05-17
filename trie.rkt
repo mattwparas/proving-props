@@ -24,6 +24,10 @@
     [trie<? (-> trie? trie? boolean?)]
     [pre-order-traverse (-> trie? void)]
     [build-trie-from-list-of-words (-> trie? (listof string?) integer? trie?)]
+    [not-neg-one (-> integer? boolean?)]
+    [trie-sort (-> trie? (listof string?) (listof string?))]
+    [pre-order-helper (-> trie? (listof integer?))]
+    ;; TODO add contract for pre-order-sort
 ))
 
 ;; contract: trie list-of-characters -> bool
@@ -111,6 +115,22 @@
       (build-trie-from-list-of-words
         (insert trie (first list-of-words) index)
           (rest list-of-words) (+ 1 index))]))
+
+;; contract: interter? -> boolean?
+(define (not-neg-one num)
+  (not (= -1 num)))
+
+;; contract: trie listof-string? -> listof-string?
+(define (trie-sort trie-node list-of-words)
+  (define indices
+    (filter not-neg-one
+      (flatten (pre-order-helper trie-node))))
+  (map (lambda (index) (list-ref list-of-words index)) indices))
+
+;; contract: trie? -> listof-integer?
+(define (pre-order-helper trie-node)
+  (cons (trie-index trie-node)
+  (map pre-order-helper (trie-children trie-node))))
 
 ;; contract: void -> trie
 (define empty-trie (trie void empty #f -1))
@@ -215,11 +235,10 @@
       #f -1)) 
 #f -1))
 
-
 ;;; (pre-order-traverse testtrie)
 
-
 (define inserted-words (list "bad" "bat" "bam" "bet" "bed" "bell"))
+(define sorted-list (list "bad" "bam" "bat" "bed" "bell" "bet"))
 (define not-inserted-words (list "apple" "tomato" "cucumber" "b" "a" "m" "c" "l" "d" "t" ""))
 
 
@@ -246,8 +265,6 @@
 ;;;  (pre-order-traverse testtrie_after_insert_be)
 ;;;   (pre-order-traverse (insert testtrie "be" -1))
 
-(pre-order-traverse (build-trie-from-list-of-words empty-trie inserted-words 0))
-
 (define insert-tests
   (test-suite
     "Tests for insert"
@@ -257,7 +274,18 @@
           (check-true (equal? (insert testtrie "be" -1) testtrie_after_insert_be))
           (check-true (equal? (build-trie-from-list-of-words empty-trie inserted-words 0)
                               better-testtrie)))))
-
+                              
+(define sort-tests 
+  (test-suite
+    "Tests for sort"
+      (test-case  
+        "Sort from a basic trie"
+          (check-true (equal? (trie-sort
+                                    (build-trie-from-list-of-words empty-trie inserted-words 0) 
+                                    inserted-words)
+                            sorted-list)))))
+                          
 (run-tests lookup-tests)
 (run-tests insert-tests)
+(run-tests sort-tests)
 
