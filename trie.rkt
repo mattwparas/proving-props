@@ -28,9 +28,12 @@
 
 (define (lookup root-trie word)
   (define char-list (string->list word))
-  (for/first ([i (trie-children root-trie)]
-    #:when (char=? (first char-list) (trie-char i)))
-    (lookup-helper i char-list)))
+  (displayln (empty? char-list))
+  (if (not (empty? char-list)) ;; if not empty, perform search
+    (for/first ([i (trie-children root-trie)]
+      #:when (char=? (first char-list) (trie-char i)))
+      (lookup-helper i char-list))
+    #f)) ;; otherwise return false
   
 ;; copies the remainder of the trie from the given node
 (define (copy trie-node)
@@ -107,7 +110,7 @@
 (pre-order-traverse testtrie)
 
 (define inserted-words (list "bed" "bat" "bam" "bet" "bed" "bell"))
-(define not-inserted-words (list "apple" "tomato" "cucumber" "b" "a" "m" "c" "l" "d" "t"))
+(define not-inserted-words (list "apple" "tomato" "cucumber" "b" "a" "m" "c" "l" "d" "t" ""))
 
 
 (define lookup-tests
