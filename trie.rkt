@@ -6,8 +6,9 @@
 
 ;; char -> character
 ;; children -> list of tries
-;; assume the list of children is ordered?
+;; assume the list of children is ordered? maybe?
 ;; end-word? -> bool
+;; index -> index of word in the original list
 (struct trie (char children end-word? index))
 
 ;; is the trie composed of values on the edges
@@ -29,6 +30,27 @@
   (for/first ([i (trie-children root-trie)]
   #:when (char=? (first (string->list word)) (trie-char i)))
   (lookup-helper i (string->list word))))
+  
+;; copies the remainder of the trie from the given node
+(define (copy trie-node)
+  (trie
+    (trie-char trie-node)
+    (map copy (trie-children trie-node))
+    (trie-end-word? trie-node)
+    (trie-index trie-node)
+  )
+)
+
+;; stub
+(define (insert-helper trie char-list index)
+  #t)
+
+;; stub
+(define (insert root-trie word index)
+  #t)
+
+
+
 
 ;;; words in this test trie
 ;; bad, bat, bam, bet, bed, bell
@@ -57,7 +79,6 @@
     #f -1)
 )
 
-
 (define inserted-words (list "bed" "bat" "bam" "bet" "bed" "bell"))
 (define not-inserted-words (list "apple" "tomato" "cucumber" "b" "a" "m" "c" "l" "d" "t"))
 
@@ -76,7 +97,24 @@
         (check-false (lookup testtrie word))))
 ))
 
+
+(define copy-test-trie (copy testtrie))
+(define copy-lookup-tests
+  (test-suite
+    "Tests for lookup"
+    (test-case
+      "All the words inserted can be found"
+      (for/list ([word inserted-words])
+        (check-true (lookup copy-test-trie word))))
+
+    (test-case
+      "Words not in the trie are not found"
+      (for/list ([word not-inserted-words])
+        (check-false (lookup copy-test-trie word))))
+))
+
 (run-tests lookup-tests)
+(run-tests copy-lookup-tests)
 
 ;;; (define file-tests
 ;;;   (test-suite
