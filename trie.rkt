@@ -23,13 +23,13 @@
     (trie-end-word? trie-node)] ; #t or #f here
   [else
     (for/first ([i (trie-children trie-node)]
-    #:when (char=? (first (rest char-list)) (trie-char i)))
-    (lookup-helper i (rest char-list)))])) ; recur on the child which matches character
+      #:when (char=? (first (rest char-list)) (trie-char i)))
+      (lookup-helper i (rest char-list)))])) ; recur on the child which matches character
 
 (define (lookup root-trie word)
   (for/first ([i (trie-children root-trie)]
-  #:when (char=? (first (string->list word)) (trie-char i)))
-  (lookup-helper i (string->list word))))
+    #:when (char=? (first (string->list word)) (trie-char i)))
+    (lookup-helper i (string->list word))))
   
 ;; copies the remainder of the trie from the given node
 (define (copy trie-node)
@@ -45,9 +45,30 @@
 (define (insert-helper trie char-list index)
   #t)
 
-;; stub
+;; main function for insert
+;; takes the rooted trie and sets it on its path
 (define (insert root-trie word index)
-  #t)
+  (define char-list (string->list word))
+  (trie
+    (trie-char root-trie) ; should always be void
+    (map (lambda (trie-node)
+          (if (char=? (trie-char trie-node) (first char-list)
+            (insert-helper trie-node char-list index) ; if the characters match, call helper
+            (copy char-start)))) ; if the characters dont match, just copy the rest of that
+          (trie-children root-trie)) ;; set up the children
+    (trie-end-word? root-trie) ; should always be false
+    (trie-index root-trie) ; should always be -1
+  )
+)
+
+
+
+  (for/list ([char-start (trie-children root-trie)]
+    (if (char=? char-start (first char-list))
+      (insert-helper char-start char-list index) ; start using the helper on that branch
+      (copy char-start) ; otherwise copy the branch all the way down
+      )
+  ))
 
 (define (pre-order-traverse trie-node)
   (displayln (trie-char trie-node))
