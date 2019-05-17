@@ -12,13 +12,24 @@
 ;;    index of word in the original list
 (struct trie (char children end-word? index) #:transparent)
 
-;; is the trie composed of values on the edges
-;;; (struct root-trie (children))
+(provide 
+  (contract-out
+    [lookup-helper (-> trie? (non-empty-listof char?) boolean?)]
+    [lookup (-> trie? string? boolean?)]
+    ;; TODO maybe use nat instead of integer
+    [create-children (-> (non-empty-listof char?) (listof trie?) integer? (listof trie?))]
+    [handle-last-letter (-> (listof char?) (listof trie?) integer? (listof trie?))]
+    [handle-intern-letter (-> (listof char?) (listof trie?) integer? (listof trie?))]
+    [insert (-> trie? string? integer? trie?)]
+    [trie<? (-> trie? trie? boolean?)]
+    [pre-order-traverse (-> trie? void)]
+    [build-trie-from-list-of-words (-> trie? (listof string?) integer? trie?)]
+))
 
 ;; contract: trie list-of-characters -> bool
 (define (lookup-helper trie-node char-list)
   (cond
-  [(empty? char-list) #f] ; hit the case where its empty
+  [(empty? char-list) #f] ; hit the case where its empty THIS IS PROBABLY NOT NEEDED
   [(not (char=? (first char-list) (trie-char trie-node))) #f] ; no match, false
   [(= (length char-list) 1) ; return if its an end word
     (trie-end-word? trie-node)] ; #t or #f here
@@ -35,45 +46,42 @@
       #:when (char=? (first char-list) (trie-char i)))
       (lookup-helper i char-list))
     #f)) ;; otherwise return false
-  
 
-
-;;; ;; contract: list-of-characters character -> list-of-characters
-;;; (define (create-chars lst value) 
-;;;   (cond [(empty? lst)          ; if the list is empty
-;;;          (list value)]        ; then return a single-element list
-;;;         [(char<=? value (first lst)) ; if current element >= value
-;;;          (cons value lst)]   ; insert value in current position
-;;;         [else                 ; otherwise keep building the list
-;;;          (cons (first lst)      ; by adding current element
-;;;                (create-chars value (rest lst)))])) ; and advancing recursion)
-
-;;(struct trie (char children end-word? index))
-;; contract: list-of-chars list-of-tries inte-> list-of-tries
+;; contract: list-of-chars list-of-tries int -> list-of-tries
 (define (create-children char-list lst index)
   (cond [(= (length char-list) 1)
-              (cond [(empty? lst) 
-                        (list (trie (first char-list) empty #t index))]
-                    [(char<? (first char-list) (trie-char (first lst)))
-                        (cons (trie (first char-list) empty #t index) lst)]
-                    [(char=? (first char-list) (trie-char (first lst)))
-                        (cons (trie (first char-list) (trie-children (first lst)) #t index) (rest lst))]
-                    [else
-                        (cons (first lst)
-                              (create-children char-list (rest lst) index))])]
+          (handle-last-letter char-list lst index)]
         [else ;; you are in the middle of the word
-              (cond [(empty? lst)
-                        (list (trie (first char-list) (create-children 
-                                                          (rest char-list) empty index) #f -1))]
-                    [(char<? (first char-list) (trie-char (first lst)))
-                        (cons (trie (first char-list) (create-children 
-                                                          (rest char-list) empty index) #f -1) lst)]
-                    [(char=? (first char-list) (trie-char (first lst)))
-                        (cons (trie (first char-list) (create-children
-                                                          (rest char-list) (trie-children (first lst)) index) #f -1) (rest lst))]
-                    [else
-                        (cons (first lst)
-                              (create-children char-list (rest lst) index))])]))
+          (handle-intern-letter char-list lst index)]))
+
+;; contract: list-of-chars list-of-tries int -> list-of-tries
+(define (handle-last-letter char-list lst index)
+  (define char (first char-list))
+  (cond [(empty? lst) 
+            (list (trie char empty #t index))]
+        [(char<? char (trie-char (first lst)))
+            (cons (trie char empty #t index) lst)]
+        [(char=? char (trie-char (first lst)))
+            (cons (trie char (trie-children (first lst)) #t index) (rest lst))]
+        [else
+            (cons (first lst)
+                  (create-children char-list (rest lst) index))]))
+
+;; contract: list-of-chars list-of-tries int -> list-of-tries
+(define (handle-intern-letter char-list lst index)
+  (define char (first char-list))
+  (cond [(empty? lst)
+          (list (trie char (create-children 
+                              (rest char-list) empty index) #f -1))]
+        [(char<? char (trie-char (first lst)))
+            (cons (trie char (create-children 
+                                (rest char-list) empty index) #f -1) lst)]
+        [(char=? char (trie-char (first lst)))
+            (cons (trie char (create-children
+                                (rest char-list) (trie-children (first lst)) index) #f -1) (rest lst))]
+        [else
+            (cons (first lst)
+                  (create-children char-list (rest lst) index))]))
 
 ;; contract: trie string integer -> trie
 (define (insert root-trie word index)
@@ -84,26 +92,31 @@
       (trie-end-word? root-trie)
       (trie-index root-trie)))
 
-;; contract: trie char -> bool
-(define (trie<=? trie1 char)
-  (char<=? char (trie-char trie1)))
+;; contract: trie trie -> bool
+(define (trie<? trie1 trie2)
+  (char<? (trie-char trie1) (trie-char trie2)))
 
-
+;; contract: trie -> void
 (define (pre-order-traverse trie-node)
-  (displayln (trie-char trie-node))
-  (displayln (trie-end-word? trie-node))
+  (displayln (list (trie-char trie-node) (trie-end-word? trie-node) (trie-index trie-node)))
   (map pre-order-traverse (trie-children trie-node))
-  "finished"
-)
+  "finished")
 
-;; copies the remainder of the trie from the given node
-;; contract: trie -> trie
-(define (copy trie-node)
-  (trie
-    (trie-char trie-node)
-    (map copy (trie-children trie-node))
-    (trie-end-word? trie-node)
-    (trie-index trie-node)))
+;; contract: trie list-of-strings int -> trie
+(define (build-trie-from-list-of-words trie list-of-words index)
+  (cond
+    [(= (length list-of-words) 1)
+      (insert trie (first list-of-words) index)]
+    [else
+      (build-trie-from-list-of-words
+        (insert trie (first list-of-words) index)
+          (rest list-of-words) (+ 1 index))]))
+
+;; contract: void -> trie
+(define empty-trie (trie void empty #f -1))
+
+;;;;;;;;;;;;;;;;;;;;;;;;; TESTS ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 
 ;;; words in this test trie
 ;; bad, bat, bam, bet, bed, bell
@@ -124,6 +137,29 @@
                 (trie #\d empty #t -1)
                 (trie #\l (list (trie #\l empty #t -1)) #f -1)
                 (trie #\t empty #t -1)) 
+          #f -1)) 
+      #f -1)) 
+#f -1))
+
+;;; words in this test trie
+;; bad, bat, bam, bet, bed, bell
+(define better-testtrie
+  (trie ; define the root 
+    void ; contains no character
+      (list
+        (trie #\b 
+          (list
+            (trie #\a 
+              (list
+                (trie #\d empty #t 0)
+                (trie #\m empty #t 2)
+                (trie #\t empty #t 1)) 
+              #f -1)
+            (trie #\e 
+              (list
+                (trie #\d empty #t 4)
+                (trie #\l (list (trie #\l empty #t 5)) #f -1)
+                (trie #\t empty #t 3)) 
           #f -1)) 
       #f -1)) 
 #f -1))
@@ -183,7 +219,7 @@
 ;;; (pre-order-traverse testtrie)
 
 
-(define inserted-words (list "bed" "bat" "bam" "bet" "bed" "bell"))
+(define inserted-words (list "bad" "bat" "bam" "bet" "bed" "bell"))
 (define not-inserted-words (list "apple" "tomato" "cucumber" "b" "a" "m" "c" "l" "d" "t" ""))
 
 
@@ -206,28 +242,11 @@
 ))
 
 
-(define copy-test-trie (copy testtrie))
-(define copy-lookup-tests
-  (test-suite
-    "Tests for lookup"
-    (test-case
-      "All the words inserted can be found"
-      (for/list ([word inserted-words])
-        (check-true (lookup copy-test-trie word))))
-
-    (test-case
-      "Words not in the trie are not found"
-      (for/list ([word not-inserted-words])
-        (check-false (lookup copy-test-trie word))))
-
-    (test-case
-      "Check equality of copy"
-      (check-true (equal? copy-test-trie testtrie)))
-))
-
 ;;; debugging prints
 ;;;  (pre-order-traverse testtrie_after_insert_be)
 ;;;   (pre-order-traverse (insert testtrie "be" -1))
+
+(pre-order-traverse (build-trie-from-list-of-words empty-trie inserted-words 0))
 
 (define insert-tests
   (test-suite
@@ -235,9 +254,10 @@
       (test-case
         "Insert 'app' into trie"
           (check-true (equal? (insert testtrie "app" -1) testtrie_after_insert))
-          (check-true (equal? (insert testtrie "be" -1) testtrie_after_insert_be)))))
+          (check-true (equal? (insert testtrie "be" -1) testtrie_after_insert_be))
+          (check-true (equal? (build-trie-from-list-of-words empty-trie inserted-words 0)
+                              better-testtrie)))))
 
 (run-tests lookup-tests)
-(run-tests copy-lookup-tests)
 (run-tests insert-tests)
 
