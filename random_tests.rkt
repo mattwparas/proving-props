@@ -92,14 +92,29 @@
                 (check-false (for/and ([word list2])
                                (lookup built-trie word)))))))
 
+(define tree-is-deterministic
+  (test-suite
+    "Test to see if insert produces the same tree with a different insertion order"
+    (test-case "First insert deterministic test"
+              (for ([i 100])
+                (define list-of-strings (make-random-list-of-unique-strings alphabet))
+                (define shuffled-list-of-strings (shuffle list-of-strings))
+                (define trie1 (build-trie-from-list-of-words 
+                    empty-trie
+                    list-of-strings
+                    0))
+                (define trie2 (build-trie-from-list-of-words
+                    empty-trie
+                    shuffled-list-of-strings
+                    0))
+                (define sorted-list-1 
+                  (trie-sort trie1 list-of-strings))
+                (define sorted-list-2 
+                  (trie-sort trie2 shuffled-list-of-strings))
+                (check-true (equal? sorted-list-1 sorted-list-2))))))
 
-;(run-tests random-trie-tests)
-;(run-tests random-sort-tests)
-
+;; test suite
+(run-tests random-trie-tests)
+(run-tests random-sort-tests)
 (run-tests random-lookup-tests)
-
-;;; (require test)
-
-;;; (make-a-string "abcdefghijklmnopqrstuvwxyz")
-
-;;; (make-random-list-of-strings "abcdefghijklmnopqrstuvwxyz")
+(run-tests tree-is-deterministic)
