@@ -14,7 +14,13 @@
     [insert (-> trie? string? integer? trie?)]
     [trie<? (-> trie? trie? boolean?)]
     [pre-order-traverse (-> trie? void)]
-    [build-trie-from-list-of-words (-> trie? (listof string?) integer? trie?)]
+    [build-trie-from-list-of-words (->i ([x trie?] 
+                                        [y (and/c (listof string?) (lambda (y)
+                                                                      (only-unique-words y)))]
+                                        [z integer?])
+                                        [res (y) (and/c trie? ;# (and/c (lambda (res) all-children-in-order res)# ;
+                                                                (and/c (lambda (res) (num-of-nodes<=num-of-chars res y))
+                                                                  (lambda (res) (num-of-words=num-of-true res y))))])]
     [not-neg-one (-> integer? boolean?)]
     [trie-sort (-> trie? (listof string?) (listof string?))]
     [pre-order-helper (-> trie? (listof integer?))]
@@ -25,6 +31,8 @@
 ;; end-word?  :  bool
 ;; index      :  int        (index of word in the original list)
 (struct trie (char children end-word? index) #:transparent)
+
+(define empty-trie (trie void empty #f -1))
 
 ;; contract: trie list-of-characters -> bool
 (define (lookup-helper trie-node char-list)
@@ -93,14 +101,14 @@
       (trie-index root-trie)))
 
 ;; contract: trie trie -> bool
-(define (trie<? trie1 trie2)
-  (char<? (trie-char trie1) (trie-char trie2)))
+(define (trie<? trie-node1 trie-node2)
+  (char<? (trie-char trie-node1) (trie-char trie-node2)))
 
 ;; contract: trie -> void
 (define (pre-order-traverse trie-node)
   (displayln (list (trie-char trie-node) (trie-end-word? trie-node) (trie-index trie-node)))
   (map pre-order-traverse (trie-children trie-node))
-  "finished")
+    "finished")
 
 ;; contract: trie list-of-strings int -> trie
 (define (build-trie-from-list-of-words trie list-of-words index)
@@ -116,7 +124,7 @@
 (define (not-neg-one num)
   (not (= -1 num)))
 
-;; contract: trie listof-string? -> listof-string?
+;; contract: trie? listof-string? -> listof-string?
 (define (trie-sort trie-node list-of-words)
   (define indices
     (filter not-neg-one
@@ -126,8 +134,75 @@
 ;; contract: trie? -> listof-integer?
 (define (pre-order-helper trie-node)
   (cons (trie-index trie-node)
-  (map pre-order-helper (trie-children trie-node))))
+    (map pre-order-helper (trie-children trie-node))))
 
-;; contract: void -> trie
-(define empty-trie (trie void empty #f -1))
+;; --------------------------- PROPERTY FUNCTIONS ------------------------------
 
+;; used
+;; contract: (listof string?) -> boolean?
+(define (only-unique-words list-of-words) 
+  (eq? (length (remove-duplicates list-of-words)) (length list-of-words)))
+
+;; used
+;; contract: trie? -> (listof string?)
+(define (num-of-words=num-of-true trie-node list-of-words)
+  (eq? (count-words-in-trie trie-node) (length list-of-words)))
+
+;; contract: trie? -> (listof bool?)
+(define (count-helper trie-node)
+  (cons (trie-end-word? trie-node)
+    (map count-helper (trie-children trie-node))))
+
+;; contract: trie? -> natural?
+(define (count-words-in-trie trie-node)
+  (define t-and-f-list
+    (filter (lambda (element) element)
+      (flatten (count-helper trie-node))))
+  (length t-and-f-list))
+
+;; used
+;; contract: trie? (listof string?) -> boolean?
+(define (num-of-nodes<=num-of-chars trie-node list-of-words)
+  (<= (count-nodes-in-trie trie-node) (num-of-chars list-of-words)))
+
+;; contract: trie? -> (listof char?)
+(define (count-nodes-helper trie-node)
+  (cons (trie-char trie-node) 
+    (map count-helper (trie-children trie-node))))
+
+;; contract: trie? -> natural?
+(define (count-nodes-in-trie trie-node)
+  (define list-of-all-nodes 
+    (length (count-nodes-helper trie-node)))
+  list-of-all-nodes)
+
+;; contract: (listof string?) -> natural?
+(define (num-of-chars list-of-words)
+ (for/sum ([word list-of-words])
+  (length (string->list word))))
+
+;; contract: (listof char?) -> boolean?
+(define (ordered? lst)
+  (cond [(empty? lst) #t]
+        [(= (length lst) 1) #t]
+        [(char<? (first lst) (first (rest lst)))
+         (ordered? (rest lst))]
+        [else #f]))
+
+;;; (define (ordered? lst)
+;;;   (apply char<? lst))
+
+;; contract: trie? -> boolean?
+(define (child-in-order trie-node)
+  (define children-chars 
+    (map (lambda (child-node) 
+        (trie-char child-node))))
+  (ordered? children-chars))
+
+;; contract: trie? -> boolean?
+(define (all-children-in-order trie-node)
+  (and (child-in-order trie-node)
+    (for/and ([child (trie-children trie-node)])
+      (all-children-in-order child))))
+
+;; recursively checks that all the children are in order
