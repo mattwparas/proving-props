@@ -52,8 +52,20 @@
           (make-random-list-of-unique-strings alphabet)
           0)))))
 
+(define random-sort-tests
+  (test-suite
+    "Tests for randomly sorting lists of strings"
+    (test-case "First random test"
+      (for ([i 5100])
+        (define strings (make-random-list-of-unique-strings alphabet)) 
+        (trie-sort (build-trie-from-list-of-words 
+          empty-trie
+          strings
+          0) strings)))))
 
-(run-tests random-trie-tests)
+
+;(run-tests random-trie-tests)
+(run-tests random-sort-tests)
 
 ;;; (require test)
 

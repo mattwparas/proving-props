@@ -24,7 +24,11 @@
                                                                   (lambda (res) (num-of-words=num-of-true res y))
                                                                   )))])]
     [not-neg-one (-> integer? boolean?)]
-    [trie-sort (-> trie? (listof string?) (listof string?))]
+    [trie-sort (->i ([x trie?]
+                     [y (listof string?)])
+                    [res (y) (and/c (lambda (res) (string-list-sorted? res))
+                              (and/c (lambda (res) (permutation? y res))
+                                    (listof string?)))])]
     [pre-order-helper (-> trie? (listof integer?))]
 ))
 
@@ -193,8 +197,8 @@
          (ordered? (rest lst))]
         [else #f]))
 
-;;; (define (ordered? lst)
-;;;   (apply char<? lst))
+(define (string-list-sorted? lst)
+   (apply string<? lst))
 
 ;; contract: trie? -> boolean?
 (define (child-in-order trie-node)
@@ -209,4 +213,35 @@
     (for/and ([child (trie-children trie-node)])
       (all-children-in-order child))))
 
-;; recursively checks that all the children are in order
+
+(define (permutation? list1 list2)
+  (and
+   (not (check-duplicates list1))
+   (not (check-duplicates list2))
+   (= (length list1) (length list2))
+   (for/and ([i list1])
+     (not (false? (member i list2))))
+   (for/and ([i list2])
+     (not (false? (member i list1))))))
+
+
+
+
+
+
+
+
+
+     
+
+
+
+
+
+
+
+
+
+
+
+
