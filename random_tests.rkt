@@ -31,6 +31,12 @@
 (define (make-random-list-of-unique-strings candidates)
   (remove-duplicates (make-random-list-of-strings candidates)))
 
+
+(define (generate-list-of-length>2 input-list)
+  (if (<= (length input-list) 2)
+      (generate-list-of-length>2 (make-random-list-of-unique-strings alphabet))
+      input-list))
+
 (module+ test
   (require rackunit)
   (check-true (string? (make-a-string alphabet)))
@@ -56,7 +62,7 @@
   (test-suite
     "Tests for randomly sorting lists of strings"
     (test-case "First random test"
-      (for ([i 5100])
+      (for ([i 5000])
         (define strings (make-random-list-of-unique-strings alphabet)) 
         (trie-sort (build-trie-from-list-of-words 
           empty-trie
@@ -64,8 +70,33 @@
           0) strings)))))
 
 
+;; these require some refinement
+(define random-lookup-tests
+  (test-suite
+   "Tests for looking up words inserted into trie when "
+   (test-case "First random test"
+              (for ([i 100])
+                (define start-list (make-random-list-of-unique-strings alphabet))
+                (define list-of-strings (generate-list-of-length>2 start-list))
+                (define split-index (random 1 (- (length list-of-strings) 1)))
+                (define list1 (map (lambda (index) (list-ref list-of-strings index))
+                                   (range split-index)))
+                (define list2 (map (lambda (index) (list-ref list-of-strings index))
+                                   (range split-index (length list-of-strings))))
+                (define built-trie (build-trie-from-list-of-words
+                                    empty-trie
+                                    list1
+                                    0))
+                (check-true (for/and ([word list1])
+                              (lookup built-trie word)))
+                (check-false (for/and ([word list2])
+                               (lookup built-trie word)))))))
+
+
 ;(run-tests random-trie-tests)
-(run-tests random-sort-tests)
+;(run-tests random-sort-tests)
+
+(run-tests random-lookup-tests)
 
 ;;; (require test)
 
