@@ -18,9 +18,9 @@
                                         [y (and/c (listof string?) (lambda (y)
                                                                       (only-unique-words y)))]
                                         [z integer?])
-                                        [res (y) (and/c trie? ;# (and/c (lambda (res) all-children-in-order res)# ;
+                                        [res (y) (and/c trie? (and/c (lambda (res) all-children-in-order res)
                                                                 (and/c (lambda (res) (num-of-nodes<=num-of-chars res y))
-                                                                  (lambda (res) (num-of-words=num-of-true res y))))])]
+                                                                  (lambda (res) (num-of-words=num-of-true res y)))))])]
     [not-neg-one (-> integer? boolean?)]
     [trie-sort (-> trie? (listof string?) (listof string?))]
     [pre-order-helper (-> trie? (listof integer?))]
@@ -146,6 +146,10 @@
 ;; used
 ;; contract: trie? -> (listof string?)
 (define (num-of-words=num-of-true trie-node list-of-words)
+  ;(display "number of words ")
+  ;(displayln (length list-of-words))
+  ;(display "number of true ")
+  ;(displayln (count-words-in-trie trie-node))
   (eq? (count-words-in-trie trie-node) (length list-of-words)))
 
 ;; contract: trie? -> (listof bool?)

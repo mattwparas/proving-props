@@ -35,11 +35,11 @@
   (require rackunit)
   (check-true (string? (make-a-string alphabet)))
   (check-true 
-    ((listof string? 
-    (make-random-list-of-strings alphabet))))
+    ((listof string?)
+    (make-random-list-of-strings alphabet)))
   (check-true 
-    ((listof string? 
-    (make-random-list-of-unique-strings alphabet)))))
+    ((listof string?)
+    (make-random-list-of-unique-strings alphabet))))
 
 
 (define test-strings (make-random-list-of-unique-strings alphabet))
@@ -53,7 +53,7 @@
 (define random-trie-tests
   (test-suite
     "Tests for randomly building tries"
-    (test-case
+    (test-case "First random test"
       (for ([i 10])
         (build-trie-from-list-of-words 
           empty-trie
