@@ -19,8 +19,10 @@
                                                                       (only-unique-words y)))]
                                         [z integer?])
                                         [res (y) (and/c trie? (and/c (lambda (res) all-children-in-order res)
-                                                                (and/c (lambda (res) (num-of-nodes<=num-of-chars res y))
-                                                                  (lambda (res) (num-of-words=num-of-true res y)))))])]
+                                                                (and/c
+                                                                 (lambda (res) (num-of-char-nodes<=num-of-chars res y))
+                                                                  (lambda (res) (num-of-words=num-of-true res y))
+                                                                  )))])]
     [not-neg-one (-> integer? boolean?)]
     [trie-sort (-> trie? (listof string?) (listof string?))]
     [pre-order-helper (-> trie? (listof integer?))]
@@ -86,7 +88,11 @@
                                 (rest char-list) empty index) #f -1) lst)]
         [(char=? char (trie-char (first lst)))
             (cons (trie char (create-children
-                                (rest char-list) (trie-children (first lst)) index) #f -1) (rest lst))]
+                                (rest char-list)
+                                (trie-children (first lst)) index)
+                        (trie-end-word? (first lst))
+                        (trie-index (first lst)))
+                  (rest lst))]
         [else
             (cons (first lst)
                   (create-children char-list (rest lst) index))]))
@@ -146,10 +152,6 @@
 ;; used
 ;; contract: trie? -> (listof string?)
 (define (num-of-words=num-of-true trie-node list-of-words)
-  ;(display "number of words ")
-  ;(displayln (length list-of-words))
-  ;(display "number of true ")
-  ;(displayln (count-words-in-trie trie-node))
   (eq? (count-words-in-trie trie-node) (length list-of-words)))
 
 ;; contract: trie? -> (listof bool?)
@@ -166,19 +168,17 @@
 
 ;; used
 ;; contract: trie? (listof string?) -> boolean?
-(define (num-of-nodes<=num-of-chars trie-node list-of-words)
-  (<= (count-nodes-in-trie trie-node) (num-of-chars list-of-words)))
+(define (num-of-char-nodes<=num-of-chars trie-node list-of-words)
+  (<= (count-char-nodes-in-trie trie-node) (num-of-chars list-of-words)))
 
 ;; contract: trie? -> (listof char?)
-(define (count-nodes-helper trie-node)
+(define (count-char-nodes-helper trie-node)
   (cons (trie-char trie-node) 
     (map count-helper (trie-children trie-node))))
 
 ;; contract: trie? -> natural?
-(define (count-nodes-in-trie trie-node)
-  (define list-of-all-nodes 
-    (length (count-nodes-helper trie-node)))
-  list-of-all-nodes)
+(define (count-char-nodes-in-trie trie-node)
+  (- (length (count-char-nodes-helper trie-node)) 1))
 
 ;; contract: (listof string?) -> natural?
 (define (num-of-chars list-of-words)

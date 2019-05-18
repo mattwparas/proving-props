@@ -21,11 +21,11 @@
 (define (make-a-string candidates) 
   (apply 
    string 
-   (for/list ([i (in-range (random 1 11))]) 
+   (for/list ([i (in-range (random 1 100))]) 
      (string-ref candidates (random (string-length candidates)))))) 
 
 (define (make-random-list-of-strings candidates)
-  (for/list ([i (in-range (random 1 11))])
+  (for/list ([i (in-range (random 1 100))])
     (make-a-string candidates)))
 
 (define (make-random-list-of-unique-strings candidates)
@@ -42,22 +42,14 @@
     (make-random-list-of-unique-strings alphabet))))
 
 
-(define test-strings (make-random-list-of-unique-strings alphabet))
-
-;;; (displayln test-strings)
-
-(for ([str test-strings])
-  (displayln (list str (string-length str))))
-(displayln "done")
-
 (define random-trie-tests
   (test-suite
     "Tests for randomly building tries"
     (test-case "First random test"
-      (for ([i 10])
+      (for ([i 5000])
         (build-trie-from-list-of-words 
           empty-trie
-          test-strings
+          (make-random-list-of-unique-strings alphabet)
           0)))))
 
 
