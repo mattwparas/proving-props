@@ -73,7 +73,7 @@
 ;; these require some refinement
 (define random-lookup-tests
   (test-suite
-   "Tests for looking up words inserted into trie when "
+   "Tests for correctly looking up words in the trie and words not in the trie"
    (test-case "First random test"
               (for ([i 100])
                 (define start-list (make-random-list-of-unique-strings alphabet))
@@ -94,8 +94,8 @@
 
 (define tree-is-deterministic
   (test-suite
-    "Test to see if insert produces the same tree with a different insertion order"
-    (test-case "First insert deterministic test"
+    "Test to see if insert produces the same sorted list with a different insertion order"
+    (test-case "Deterministic test"
               (for ([i 100])
                 (define list-of-strings (make-random-list-of-unique-strings alphabet))
                 (define shuffled-list-of-strings (shuffle list-of-strings))
@@ -113,8 +113,25 @@
                   (trie-sort trie2 shuffled-list-of-strings))
                 (check-true (equal? sorted-list-1 sorted-list-2))))))
 
+(define trie-construction-returns-the-same-tree
+  (test-suite
+    "Test to see if inserting the same words in the same order produces the samea tree"
+      (test-case "Same tree test"
+        (for ([i 100])
+          (define list-of-strings (make-random-list-of-unique-strings alphabet))
+          (define trie1 (build-trie-from-list-of-words
+            empty-trie
+            list-of-strings
+            0))
+          (define trie2 (build-trie-from-list-of-words
+            empty-trie
+            list-of-strings
+            0))
+          (check-true (equal? trie1 trie2))))))
+
 ;; test suite
 (run-tests random-trie-tests)
 (run-tests random-sort-tests)
 (run-tests random-lookup-tests)
 (run-tests tree-is-deterministic)
+(run-tests trie-construction-returns-the-same-tree)
