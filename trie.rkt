@@ -146,6 +146,8 @@
   (cons (trie-index trie-node)
     (map pre-order-helper (trie-children trie-node))))
 
+;; do a fold or something
+
 ;; --------------------------- PROPERTY FUNCTIONS ------------------------------
 
 ;; used
