@@ -1,0 +1,78 @@
+module _ where
+
+open import list
+open import eq
+open import bool
+
+{-
+
+Prove that if there is a `ff` in a list, i.e., if you know this:
+
+   list-member _iff_ ff l ≡ tt
+
+for an arbitrary (l : 𝕃 𝔹), then list-and of that list is ff, i.e.:
+
+   list-and l ≡ ff
+
+The definition of list-member is in list.agda.
+
+-}
+
+falsemeansfalse : ∀ (l : 𝕃 𝔹) -> list-member _iff_ ff l ≡ tt  -> list-and l ≡ ff
+falsemeansfalse [] ()
+falsemeansfalse (tt :: l) listmember rewrite falsemeansfalse l listmember = refl
+falsemeansfalse (ff :: l) listmember = refl
+
+{-
+
+Prove a similar result for list-or, namely that if there is a tt in
+the input list, then list-or returns tt.
+
+-}
+
+truemeanstrue : ∀ (l : 𝕃 𝔹) -> list-member _iff_ tt l ≡ tt  -> list-or l ≡ tt
+truemeanstrue [] ()
+truemeanstrue (tt :: l) listmember = refl
+truemeanstrue (ff :: l) listmember rewrite truemeanstrue l listmember = refl
+
+{- prove that reversing a list twice returns the same list, i.e.
+
+rev2x : ∀{ℓ}{A : Set ℓ} → (l : 𝕃 A) -> reverse (reverse l) ≡ l
+
+HINT: prove two lemmas, one that says what happens when
+reverse-helper's first argument end with the list element `x` and one
+that says what happens when the second argument ends with the list
+element `x`. Here is the statement for the first one of those: 
+
+rh-firstarg : ∀{ℓ}{A : Set ℓ} → (x : A) -> (l m : 𝕃 A) -> 
+  reverse-helper (l ++ (x :: [])) m ≡ (reverse-helper l m) ++ (x :: [])
+
+These will be useful for finishing the inductive case in rev2x.
+
+-}
+
+rh-firstarg : ∀{ℓ}{A : Set ℓ} → (x : A) -> (l m : 𝕃 A) -> 
+  reverse-helper (l ++ (x :: [])) m ≡ (reverse-helper l m) ++ (x :: [])
+rh-firstarg x [] [] = refl
+rh-firstarg x [] (x1 :: m) = rh-firstarg x (x1 :: []) m
+rh-firstarg x (x1 :: l) [] = refl
+rh-firstarg x (x1 :: l) (x2 :: m) = rh-firstarg x (x2 :: x1 :: l) m
+
+
+{- this is gonna change though -}
+
+
+rh-secondarg : ∀{ℓ}{A : Set ℓ} → (x : A) -> (l m : 𝕃 A) -> 
+  reverse-helper l (m ++ (x :: [])) ≡ (x :: []) ++ (reverse-helper l m)
+rh-secondarg x [] [] = refl
+rh-secondarg x [] (x1 :: m) = rh-secondarg x (x1 :: []) m
+rh-secondarg x (x1 :: l) [] = refl
+rh-secondarg x (x1 :: l) (x2 :: m) = rh-secondarg x (x2 :: x1 :: l) m
+
+
+rev2x : ∀{ℓ}{A : Set ℓ} → (l : 𝕃 A) -> reverse (reverse l) ≡ l
+rev2x [] = refl
+rev2x (x :: l)
+  rewrite rh-firstarg x [] l
+  | rh-secondarg x [] (reverse-helper [] l )
+  | rev2x l = refl

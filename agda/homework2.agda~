@@ -1,0 +1,68 @@
+module _ where
+
+open import nat
+open import eq
+open import sum
+open import bool
+open import bool-thms
+open import nat-thms
+open import product
+open import product-thms
+
+{- prove that if the maximum and the minimum of two numbers are the
+   same, the numbers themselves must also be the same 
+
+    minmax≡ : ∀ n m -> min n m ≡ max n m -> n ≡ m
+
+   HINT: consider all four cases of `n` and `m` as either
+   `zero` or `(suc n)`. Three will either be impossible
+   or trivial. For the last one, look in nat-thms.agda
+   to see if you find some useful rewrites. You may need
+   to do a case split on n < m (which is interesting, as you
+   are trying to prove that it never happens)
+-}
+
+minmax≡ : ∀ n m -> min n m ≡ max n m -> n ≡ m
+minmax≡ zero zero min≡max = refl
+minmax≡ zero (suc m) ()
+minmax≡ (suc n) zero ()
+minmax≡ (suc n) (suc m) min̄n≡max rewrite (ite-arg suc (n < m) n m) | (ite-arg suc (n < m) m n ) with (n < m)
+minmax≡ (suc n) (suc m) min≡max | tt = min≡max 
+minmax≡ (suc n) (suc m) min≡max | ff = sym min≡max
+
+
+{- consider this alternative definition of less than: -}
+
+_≥2_ : nat -> nat -> bool
+zero ≥2  zero = tt
+zero ≥2 (suc m) = ff
+(suc n) ≥2 zero = tt
+(suc n) ≥2 (suc m) = n ≥2 m
+
+{- prove that it is the same as the other definition, i.e.
+   prove these two results: 
+
+≥2->≥ : ∀ n m -> n ≥2 m ≡ tt -> n ≥ m ≡ tt
+
+≥->≥2 : ∀ n m -> n ≥ m ≡ tt -> n ≥2 m ≡ tt
+
+the first one is easier than the second one. For the second,
+one way to prove it is to reduce it to a helper lemma saying
+something about the relationship between `suc` and `≥`.
+-}
+
+
+≥2->≥ : ∀ n m -> n ≥2 m ≡ tt -> n ≥ m ≡ tt
+≥2->≥ zero zero x = refl
+≥2->≥ zero (suc m) ()
+≥2->≥ (suc n) zero x = refl
+≥2->≥ (suc n) (suc m) x rewrite ≥2->≥ n m x = refl
+
+
+
+≥->≥2 : ∀ n m -> n ≥ m ≡ tt -> n ≥2 m ≡ tt
+≥->≥2 zero zero x = refl
+≥->≥2 zero (suc m) ()
+≥->≥2 (suc n) zero x = refl
+≥->≥2 (suc n) (suc m) x = ≥->≥2 n m x
+
