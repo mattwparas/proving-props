@@ -34,6 +34,8 @@ open import empty
 open import list
 open import list-thms
 
+--open import negation
+
 
 
 data INTERN-TRIE : Set where
@@ -51,6 +53,13 @@ data ROOT-TRIE : Set where
 
 
 
+
+-- an empty trie
+empty-root-trie : ROOT-TRIE
+empty-root-trie = (Node [])
+
+
+
 _intern-trie<list_ : INTERN-TRIE → 𝕃 INTERN-TRIE → 𝔹
 _intern-trie<list_ (Node character end? children prefix) [] = tt -- is this valid?
 _intern-trie<list_ (Node character end? children prefix) ((Node first-char first-end? first-children first-prefix) :: rest-list) with character <char first-char
@@ -61,7 +70,7 @@ _intern-trie<list_ (Node character end? children prefix) ((Node first-char first
 intern-children-are-sorted : INTERN-TRIE → 𝔹
 intern-children-are-sorted (Node character end? [] prefix) = tt -- children are empty, default is sorted
 intern-children-are-sorted (Node character end? (first-trie :: children) prefix) with first-trie intern-trie<list children
-... | tt = intern-children-are-sorted (Node character end? children prefix)
+... | tt = intern-children-are-sorted (Node character end? children prefix) -- recur here 
 ... | ff = ff -- exit here
 
 root-children-are-sorted : ROOT-TRIE → 𝔹
@@ -70,6 +79,48 @@ root-children-are-sorted (Node (first-trie :: children)) with first-trie intern-
 ... | tt = root-children-are-sorted (Node children) -- double check this
 ... | ff = ff -- exit here
 
+
+
+
+list-one-element-length-equal-1 : ∀{ℓ}{A : Set ℓ} → (x : A) → (length (x :: [])) ≡ 1
+list-one-element-length-equal-1 {ℓ} {A} x = refl
+
+--list-more-than-one-element
+
+
+-- maybe need to pass along the proof that list of characters has one element
+create-children : (lchars : 𝕃 char) → 𝕃 INTERN-TRIE → 𝕃 char → is-empty lchars ≡ ff → 𝕃 INTERN-TRIE
+handle-intern-letter : (lchars : 𝕃 char) → 𝕃 INTERN-TRIE → 𝕃 char → is-empty lchars ≡ ff → 𝕃 INTERN-TRIE
+handle-last-letter : (lchars : 𝕃 char) → 𝕃 INTERN-TRIE → 𝕃 char → length lchars ≡ 1 → 𝕃 INTERN-TRIE
+--handle-last-letter : (lchars : 𝕃 char) → 𝕃 INTERN-TRIE → 𝕃 char → is-empty lchars ≡ ff → 𝕃 INTERN-TRIE
+-- START DEFITIONS FOR HANDLE LAST LETTER HERE
+handle-last-letter [] ltries prefix-chars ()
+handle-last-letter (x :: []) [] prefix-chars len-lchars-eq-1 = (Node x tt [] (prefix-chars ++ x :: [])) :: []
+handle-last-letter (x :: []) ((Node first-char first-end first-children first-prefix) :: ltries) prefix-chars len-lchars-eq-1 with x <char first-char
+... | tt = (Node x tt [] (prefix-chars ++ x :: [])) :: (Node first-char first-end first-children first-prefix) :: ltries -- when the characters are < 
+... | ff with x =char first-char
+... | tt = (Node x tt first-children (prefix-chars ++ x :: [])) :: ltries -- please check this (when the characters are equal)
+... | ff = (Node first-char first-end first-children first-prefix) :: (create-children (x :: []) ltries prefix-chars {!!}) -- this should be the else case -- see how the hole is actually refl
+handle-last-letter (x :: y :: lchars) ltries prefix-chars ()
+
+-- maybe need to pass along the proof that the list of characters > one element
+-- handle-intern-letter : (lchars : 𝕃 char) → 𝕃 INTERN-TRIE → 𝕃 char → is-empty lchars ≡ ff → 𝕃 INTERN-TRIE
+
+-- START DEFINITIONS FOR HANDLING INTERNAL LETTERS HERE
+handle-intern-letter lchars ltries prefix-chars lchars-not-empty = {!!}
+
+-- requires giving the proof that the input list of variables is not empty
+-- create-children : (lchars : 𝕃 char) → 𝕃 INTERN-TRIE → 𝕃 char → is-empty lchars ≡ ff → 𝕃 INTERN-TRIE
+
+-- START DEFINITIONS FOR CREATE CHILDREN HERE
+create-children [] list-tries up-to-prefix ()
+create-children (x :: []) list-tries up-to-prefix list-chars-not-empty = handle-last-letter (x :: []) list-tries up-to-prefix (list-one-element-length-equal-1 x)
+create-children (x :: y :: list-chars) list-tries up-to-prefix list-chars-not-empty = handle-intern-letter (x :: y :: list-chars) list-tries up-to-prefix list-chars-not-empty
+
+
+-- takes in the root trie, a list of input characters, a proof stating that the list of input characters is not empty, and returns a new root-trie
+insert-string-into-trie : ROOT-TRIE → (lchars : 𝕃 char) → is-empty lchars ≡ ff → ROOT-TRIE
+insert-string-into-trie (Node root-children) list-chars not-empty-chars = Node (create-children list-chars root-children [] not-empty-chars)
 
 
 
