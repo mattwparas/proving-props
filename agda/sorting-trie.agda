@@ -97,6 +97,8 @@ handle-intern-letter : (lchars : 𝕃 char) → 𝕃 INTERN-TRIE → 𝕃 char �
 
 
 handle-last-letter : (lchars : 𝕃 char) → 𝕃 INTERN-TRIE → 𝕃 char → length lchars ≡ 1 → 𝕃 INTERN-TRIE
+
+
 --handle-last-letter : (lchars : 𝕃 char) → 𝕃 INTERN-TRIE → 𝕃 char → is-empty lchars ≡ ff → 𝕃 INTERN-TRIE
 -- START DEFITIONS FOR HANDLE LAST LETTER HERE
 handle-last-letter [] ltries prefix-chars ()
@@ -112,7 +114,14 @@ handle-last-letter (x :: y :: lchars) ltries prefix-chars ()
 -- handle-intern-letter : (lchars : 𝕃 char) → 𝕃 INTERN-TRIE → 𝕃 char → is-empty lchars ≡ ff → 𝕃 INTERN-TRIE
 
 -- START DEFINITIONS FOR HANDLING INTERNAL LETTERS HERE
-handle-intern-letter lchars ltries prefix-chars lchars>1 = {!!}
+handle-intern-letter [] ltries prefix-chars ()
+handle-intern-letter (x :: []) ltries prefix-chars ()
+handle-intern-letter (x :: y :: lchars) [] prefix-chars lchars>1 = {!!}
+handle-intern-letter (x :: y :: lchars) ((Node first-char first-end first-children first-prefix) :: ltries) prefix-chars lchars>1 with x <char first-char
+... | tt = {!!} -- character is less than
+... | ff with x =char first-char
+... | tt = {!!} -- characters are the same
+... | ff = {!!} -- else case
 
 -- requires giving the proof that the input list of variables is not empty
 -- create-children : (lchars : 𝕃 char) → 𝕃 INTERN-TRIE → 𝕃 char → is-empty lchars ≡ ff → 𝕃 INTERN-TRIE
