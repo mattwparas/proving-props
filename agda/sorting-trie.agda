@@ -85,12 +85,17 @@ root-children-are-sorted (Node (first-trie :: children)) with first-trie intern-
 list-one-element-length-equal-1 : ∀{ℓ}{A : Set ℓ} → (x : A) → (length (x :: [])) ≡ 1
 list-one-element-length-equal-1 {ℓ} {A} x = refl
 
---list-more-than-one-element
+list-more-than-one-element-length>1 : ∀{ℓ}{A : Set ℓ} → (x y : A) → (l : 𝕃 A) → (length (x :: y :: l)) > 1 ≡ tt
+list-more-than-one-element-length>1 {ℓ} {A} x y l = refl
 
 
 -- maybe need to pass along the proof that list of characters has one element
 create-children : (lchars : 𝕃 char) → 𝕃 INTERN-TRIE → 𝕃 char → is-empty lchars ≡ ff → 𝕃 INTERN-TRIE
-handle-intern-letter : (lchars : 𝕃 char) → 𝕃 INTERN-TRIE → 𝕃 char → is-empty lchars ≡ ff → 𝕃 INTERN-TRIE
+
+
+handle-intern-letter : (lchars : 𝕃 char) → 𝕃 INTERN-TRIE → 𝕃 char → length lchars > 1 ≡ tt → 𝕃 INTERN-TRIE
+
+
 handle-last-letter : (lchars : 𝕃 char) → 𝕃 INTERN-TRIE → 𝕃 char → length lchars ≡ 1 → 𝕃 INTERN-TRIE
 --handle-last-letter : (lchars : 𝕃 char) → 𝕃 INTERN-TRIE → 𝕃 char → is-empty lchars ≡ ff → 𝕃 INTERN-TRIE
 -- START DEFITIONS FOR HANDLE LAST LETTER HERE
@@ -107,7 +112,7 @@ handle-last-letter (x :: y :: lchars) ltries prefix-chars ()
 -- handle-intern-letter : (lchars : 𝕃 char) → 𝕃 INTERN-TRIE → 𝕃 char → is-empty lchars ≡ ff → 𝕃 INTERN-TRIE
 
 -- START DEFINITIONS FOR HANDLING INTERNAL LETTERS HERE
-handle-intern-letter lchars ltries prefix-chars lchars-not-empty = {!!}
+handle-intern-letter lchars ltries prefix-chars lchars>1 = {!!}
 
 -- requires giving the proof that the input list of variables is not empty
 -- create-children : (lchars : 𝕃 char) → 𝕃 INTERN-TRIE → 𝕃 char → is-empty lchars ≡ ff → 𝕃 INTERN-TRIE
@@ -115,7 +120,7 @@ handle-intern-letter lchars ltries prefix-chars lchars-not-empty = {!!}
 -- START DEFINITIONS FOR CREATE CHILDREN HERE
 create-children [] list-tries up-to-prefix ()
 create-children (x :: []) list-tries up-to-prefix list-chars-not-empty = handle-last-letter (x :: []) list-tries up-to-prefix (list-one-element-length-equal-1 x)
-create-children (x :: y :: list-chars) list-tries up-to-prefix list-chars-not-empty = handle-intern-letter (x :: y :: list-chars) list-tries up-to-prefix list-chars-not-empty
+create-children (x :: y :: list-chars) list-tries up-to-prefix list-chars-not-empty = handle-intern-letter (x :: y :: list-chars) list-tries up-to-prefix (list-more-than-one-element-length>1 x y list-chars)
 
 
 -- takes in the root trie, a list of input characters, a proof stating that the list of input characters is not empty, and returns a new root-trie
@@ -124,8 +129,8 @@ insert-string-into-trie (Node root-children) list-chars not-empty-chars = Node (
 
 
 
--- if a trie is in a list, then the character will never be nothing
 
+{- SORTED LIST DEFINITIONS AND THINGS OF THE SORT -}
 
 
 -- compare the order of 2 strings (which are just list of chars)
