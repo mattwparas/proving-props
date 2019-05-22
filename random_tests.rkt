@@ -1,6 +1,6 @@
 #lang racket
 
-(require "trie.rkt")
+(require "triev2.rkt")
 (require rackunit)
 (require rackunit/text-ui)
 
@@ -55,8 +55,7 @@
       (for ([i 5000])
         (build-trie-from-list-of-words 
           empty-trie
-          (make-random-list-of-unique-strings alphabet)
-          0)))))
+          (make-random-list-of-unique-strings alphabet))))))
 
 (define random-sort-tests
   (test-suite
@@ -64,11 +63,7 @@
     (test-case "First random test"
       (for ([i 5000])
         (define strings (make-random-list-of-unique-strings alphabet)) 
-        (trie-sort (build-trie-from-list-of-words 
-          empty-trie
-          strings
-          0) strings)))))
-
+        (trie-sort strings)))))
 
 ;; these require some refinement
 (define random-lookup-tests
@@ -85,8 +80,7 @@
                                    (range split-index (length list-of-strings))))
                 (define built-trie (build-trie-from-list-of-words
                                     empty-trie
-                                    list1
-                                    0))
+                                    list1))
                 (check-true (for/and ([word list1])
                               (lookup built-trie word)))
                 (check-false (for/and ([word list2])
@@ -99,18 +93,16 @@
               (for ([i 100])
                 (define list-of-strings (make-random-list-of-unique-strings alphabet))
                 (define shuffled-list-of-strings (shuffle list-of-strings))
-                (define trie1 (build-trie-from-list-of-words 
-                    empty-trie
-                    list-of-strings
-                    0))
-                (define trie2 (build-trie-from-list-of-words
-                    empty-trie
-                    shuffled-list-of-strings
-                    0))
+                ; (define trie1 (build-trie-from-list-of-words 
+                ;     empty-trie
+                ;     list-of-strings))
+                ; (define trie2 (build-trie-from-list-of-words
+                ;     empty-trie
+                ;     shuffled-list-of-strings))
                 (define sorted-list-1 
-                  (trie-sort trie1 list-of-strings))
+                  (trie-sort list-of-strings))
                 (define sorted-list-2 
-                  (trie-sort trie2 shuffled-list-of-strings))
+                  (trie-sort shuffled-list-of-strings))
                 (check-true (equal? sorted-list-1 sorted-list-2))))))
 
 (define trie-construction-returns-the-same-tree
@@ -121,12 +113,10 @@
           (define list-of-strings (make-random-list-of-unique-strings alphabet))
           (define trie1 (build-trie-from-list-of-words
             empty-trie
-            list-of-strings
-            0))
+            list-of-strings))
           (define trie2 (build-trie-from-list-of-words
             empty-trie
-            list-of-strings
-            0))
+            list-of-strings))
           (check-true (equal? trie1 trie2))))))
 
 ;; test suite
