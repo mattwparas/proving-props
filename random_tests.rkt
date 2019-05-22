@@ -93,12 +93,6 @@
               (for ([i 100])
                 (define list-of-strings (make-random-list-of-unique-strings alphabet))
                 (define shuffled-list-of-strings (shuffle list-of-strings))
-                ; (define trie1 (build-trie-from-list-of-words 
-                ;     empty-trie
-                ;     list-of-strings))
-                ; (define trie2 (build-trie-from-list-of-words
-                ;     empty-trie
-                ;     shuffled-list-of-strings))
                 (define sorted-list-1 
                   (trie-sort list-of-strings))
                 (define sorted-list-2 

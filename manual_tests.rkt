@@ -1,6 +1,6 @@
 #lang racket
 
-(require "trie.rkt")
+(require "triev2.rkt")
 (require rackunit)
 (require rackunit/text-ui)
 
@@ -10,99 +10,76 @@
 ;;; words in this test trie
 ;; bad, bat, bam, bet, bed, bell
 (define testtrie
-  (trie ; define the root 
-    void ; contains no character
+  (trie 
+    void 
       (list
         (trie #\b 
           (list
             (trie #\a 
               (list
-                (trie #\d empty #t -1)
-                (trie #\m empty #t -1)
-                (trie #\t empty #t -1)) 
-              #f -1)
+                (trie #\d empty #t (string->list "bad"))
+                (trie #\m empty #t (string->list "bam"))
+                (trie #\t empty #t (string->list "bat"))) 
+              #f (string->list "ba"))
             (trie #\e 
               (list
-                (trie #\d empty #t -1)
-                (trie #\l (list (trie #\l empty #t -1)) #f -1)
-                (trie #\t empty #t -1)) 
-          #f -1)) 
-      #f -1)) 
-#f -1))
-
-;;; words in this test trie
-;; bad, bat, bam, bet, bed, bell
-(define better-testtrie
-  (trie ; define the root 
-    void ; contains no character
-      (list
-        (trie #\b 
-          (list
-            (trie #\a 
-              (list
-                (trie #\d empty #t 0)
-                (trie #\m empty #t 2)
-                (trie #\t empty #t 1)) 
-              #f -1)
-            (trie #\e 
-              (list
-                (trie #\d empty #t 4)
-                (trie #\l (list (trie #\l empty #t 5)) #f -1)
-                (trie #\t empty #t 3)) 
-          #f -1)) 
-      #f -1)) 
-#f -1))
+                (trie #\d empty #t (string->list "bed"))
+                (trie #\l (list (trie #\l empty #t (string->list "bell"))) #f (string->list "bel"))
+                (trie #\t empty #t (string->list "bet"))) 
+          #f (string->list "be"))) 
+      #f (string->list "b"))) 
+#f empty))
 
 ;; trie after inserting the word "app"
 (define testtrie_after_insert
-  (trie ; define the root 
-    void ; contains no character
+  (trie 
+    void 
       (list
         (trie #\a
           (list 
             (trie #\p 
               (list 
-                (trie #\p empty #t -1)) #f -1))
-            #f -1)
+                (trie #\p empty #t (string->list "app"))) #f (string->list "ap")))
+            #f (string->list "a"))
         (trie #\b 
           (list
             (trie #\a 
               (list
-                (trie #\d empty #t -1)
-                (trie #\m empty #t -1)
-                (trie #\t empty #t -1))
-              #f -1)
+                (trie #\d empty #t (string->list "bad"))
+                (trie #\m empty #t (string->list "bam"))
+                (trie #\t empty #t (string->list "bat")))
+              #f (string->list "ba"))
             (trie #\e 
               (list
-                (trie #\d empty #t -1)
-                (trie #\l (list (trie #\l empty #t -1)) #f -1)
-                (trie #\t empty #t -1)) 
-          #f -1)) 
-      #f -1)) 
-#f -1))
+                (trie #\d empty #t (string->list "bed"))
+                (trie #\l (list (trie #\l empty #t (string->list "bell"))) #f (string->list "bel"))
+                (trie #\t empty #t (string->list "bet"))) 
+          #f (string->list "be"))) 
+      #f (string->list "b"))) 
+#f empty))
 
 ;;; words in this test trie
 ;; bad, bat, bam, bet, bed, bell
 (define testtrie_after_insert_be
-  (trie ; define the root 
-    void ; contains no character
+  (trie 
+    void 
       (list
         (trie #\b 
           (list
             (trie #\a 
               (list
-                (trie #\d empty #t -1)
-                (trie #\m empty #t -1)
-                (trie #\t empty #t -1)) 
-              #f -1)
+                (trie #\d empty #t (string->list "bad"))
+                (trie #\m empty #t (string->list "bam"))
+                (trie #\t empty #t (string->list "bat")))
+              #f (string->list "ba"))
             (trie #\e 
               (list
-                (trie #\d empty #t -1)
-                (trie #\l (list (trie #\l empty #t -1)) #f -1)
-                (trie #\t empty #t -1)) 
-          #t -1)) 
-      #f -1)) 
-#f -1))
+                (trie #\d empty #t (string->list "bed"))
+                (trie #\l (list (trie #\l empty #t (string->list "bell"))) #f (string->list "bel"))
+                (trie #\t empty #t (string->list "bet")))
+          #t (string->list "be")))
+      #f (string->list "b"))) 
+#f empty))
 
 ;;; (pre-order-traverse testtrie)
 
@@ -129,29 +106,26 @@
       (check-true (lookup testtrie_after_insert_be "be")))
 ))
 
-
 ;;; debugging prints
-;;;  (pre-order-traverse testtrie_after_insert_be)
-;;;   (pre-order-traverse (insert testtrie "be" -1))
+;;(pre-order-traverse testtrie_after_insert_be)
+;;(pre-order-traverse (insert testtrie "be"))
 
 (define insert-tests
   (test-suite
     "Tests for insert"
       (test-case
         "Insert 'app' into trie"
-          (check-true (equal? (insert testtrie "app" -1) testtrie_after_insert))
-          (check-true (equal? (insert testtrie "be" -1) testtrie_after_insert_be))
-          (check-true (equal? (build-trie-from-list-of-words empty-trie inserted-words 0)
-                              better-testtrie)))))
+          (check-true (equal? (insert testtrie "app") testtrie_after_insert))
+          (check-true (equal? (insert testtrie "be") testtrie_after_insert_be))
+          (check-true (equal? (build-trie-from-list-of-words empty-trie inserted-words)
+                              testtrie)))))
                               
 (define sort-tests 
   (test-suite
     "Tests for sort"
       (test-case  
         "Sort from a basic trie"
-          (check-true (equal? (trie-sort
-                                    (build-trie-from-list-of-words empty-trie inserted-words 0) 
-                                    inserted-words)
+          (check-true (equal? (trie-sort inserted-words)
                             sorted-list)))))
                           
 (run-tests lookup-tests)
