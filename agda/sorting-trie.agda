@@ -120,8 +120,8 @@ handle-intern-letter (x :: y :: lchars) [] prefix-chars lchars>1 = (Node x ff (c
 handle-intern-letter (x :: y :: lchars) ((Node first-char first-end first-children first-prefix) :: ltries) prefix-chars lchars>1 with x <char first-char
 ... | tt = (Node x ff (create-children (y :: lchars) [] (prefix-chars ++ x :: []) refl ) (prefix-chars ++ x :: []))  :: (Node first-char first-end first-children first-prefix) :: ltries -- character is less than
 ... | ff with x =char first-char
-... | tt = {!!} -- characters are the same
-... | ff = {!!} -- else case
+... | tt = (Node x first-end (create-children (y :: lchars) first-children (prefix-chars ++ x :: []) refl) first-prefix) :: ltries  -- characters are the same
+... | ff = (Node first-char first-end first-children first-prefix) :: (create-children (x :: y :: lchars) ltries prefix-chars refl) -- else case
 
 -- requires giving the proof that the input list of variables is not empty
 -- create-children : (lchars : 𝕃 char) → 𝕃 INTERN-TRIE → 𝕃 char → is-empty lchars ≡ ff → 𝕃 INTERN-TRIE
@@ -176,7 +176,7 @@ is-permutation = {!!}
 
 -- Here is the sorting function, right now it does nothing
 trie-sort : 𝕃 string → 𝕃 string
-trie-sort lst = lst
+trie-sort lst = {!!}
 
 
 
