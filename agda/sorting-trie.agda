@@ -147,12 +147,12 @@ insert-string-into-trie (Node root-children) list-chars not-empty-chars = Node (
 _string<_ : 𝕃 char → 𝕃 char → 𝔹
 _string<_ [] [] = tt
 _string<_ [] (x :: string2) = tt -- "" < "a : pple"
-_string<_ (x :: string1) [] = ff -- "a" < ""
+_string<_ (x :: string1) [] = ff -- "a : pple" < ""
 _string<_ (x :: string1) (y :: string2) with x <char y
 ... | tt = tt -- "a : (pple)" < "b : (eets)"
 ... | ff with x =char y
 ... | tt =  string1 string< string2 -- if they are equal, recur on the next char "a : (pple)" = "a : (ble)" -> "p : (ple)" < "b : (le)"
-... | ff = ff -- BOGUS case? should never happen I guess...
+... | ff = ff -- else case
 
 
 -- given string, see if it is less than all other strings in the list
@@ -170,6 +170,49 @@ list-is-sorted (first-string :: rest-of-words) with first-string string<list res
 ... | ff = ff
 
 
+
+{- this shits whack, needs to probably change, maybe don't use map?????? 
+
+inclination is that the depth of the tree is bounded by the length of the longest word
+
+IDEA:
+Store length of the longest word in the root node, pass current depth or some shit idk that 
+way agda knows the depth is decreasing and the calls will eventually stop...
+
+-}
+pre-order-helper : INTERN-TRIE → 𝕃 (𝕃 char)
+pre-order-helper (Node character end? [] prefix) = []
+pre-order-helper (Node character end? ((Node first-char first-end first-children first-prefix) :: children) prefix) with first-end
+... | tt =  {!!} -- foldr _++_ (first-prefix :: []) (map pre-order-helper first-children)
+... | ff = {!!} -- foldr _++_ [] (map pre-order-helper first-children)
+
+pre-order : ROOT-TRIE → 𝕃 (𝕃 char)
+pre-order (Node []) = []
+pre-order (Node ((Node first-char first-end first-children first-prefix) :: children)) with first-end
+... | tt = {!!}
+... | ff = {!!}
+
+-- (foldr _++_ (first-prefix :: []) (map pre-order-helper first-children))
+
+
+{-
+IDEA : quantifty root-trie / intern-trie over all A : Set?
+Potentially solves the problem
+-}
+traversal-is-sorted : list-is-sorted (pre-order ROOT-TRIE) ≡ tt
+traversal-is-sorted = ?
+
+
+
+
+
+
+
+
+
+
+
+
 is-permutation : 𝕃 (𝕃 char) → 𝕃 (𝕃 char) → 𝔹
 is-permutation = {!!}
 
@@ -177,6 +220,5 @@ is-permutation = {!!}
 -- Here is the sorting function, right now it does nothing
 trie-sort : 𝕃 string → 𝕃 string
 trie-sort lst = {!!}
-
 
 
