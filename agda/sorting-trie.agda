@@ -38,42 +38,41 @@ open import list-thms
 
 
 
-data INTERN-TRIE : Set where
+data INTERN-TRIE {ℓ}(A : Set ℓ) : Set where
   Node :
       (character : char)
     → (end? : 𝔹)
-    → (children : 𝕃 (INTERN-TRIE))
+    → (children : 𝕃 (INTERN-TRIE A))
     → (prefix : 𝕃 char)
-      → INTERN-TRIE
+      → INTERN-TRIE A
 
 
-data ROOT-TRIE : Set where
-  Node : (children : 𝕃 (INTERN-TRIE))
-      → ROOT-TRIE
+data ROOT-TRIE {ℓ}(A : Set ℓ): Set where
+  Node : (children : 𝕃 (INTERN-TRIE A))
+      → ROOT-TRIE A
 
 
 
 
 -- an empty trie
-empty-root-trie : ROOT-TRIE
+empty-root-trie : ∀{ℓ}{A : Set ℓ} → ROOT-TRIE A
 empty-root-trie = (Node [])
 
 
-
-_intern-trie<list_ : INTERN-TRIE → 𝕃 INTERN-TRIE → 𝔹
+_intern-trie<list_ : ∀{ℓ}{A : Set ℓ} → INTERN-TRIE A → 𝕃 (INTERN-TRIE A) → 𝔹
 _intern-trie<list_ (Node character end? children prefix) [] = tt -- is this valid?
 _intern-trie<list_ (Node character end? children prefix) ((Node first-char first-end? first-children first-prefix) :: rest-list) with character <char first-char
 ... | tt = (Node character end? children prefix) intern-trie<list rest-list
 ... | ff = ff
 
 
-intern-children-are-sorted : INTERN-TRIE → 𝔹
+intern-children-are-sorted : ∀{ℓ}{A : Set ℓ} → INTERN-TRIE A → 𝔹
 intern-children-are-sorted (Node character end? [] prefix) = tt -- children are empty, default is sorted
 intern-children-are-sorted (Node character end? (first-trie :: children) prefix) with first-trie intern-trie<list children
 ... | tt = intern-children-are-sorted (Node character end? children prefix) -- recur here 
 ... | ff = ff -- exit here
 
-root-children-are-sorted : ROOT-TRIE → 𝔹
+root-children-are-sorted :  ∀{ℓ}{A : Set ℓ} → ROOT-TRIE A → 𝔹
 root-children-are-sorted (Node []) = tt
 root-children-are-sorted (Node (first-trie :: children)) with first-trie intern-trie<list children
 ... | tt = root-children-are-sorted (Node children) -- double check this
@@ -90,13 +89,13 @@ list-more-than-one-element-length>1 {ℓ} {A} x y l = refl
 
 
 -- maybe need to pass along the proof that list of characters has one element
-create-children : (lchars : 𝕃 char) → 𝕃 INTERN-TRIE → 𝕃 char → is-empty lchars ≡ ff → 𝕃 INTERN-TRIE
+create-children :  ∀{ℓ}{A : Set ℓ} → (lchars : 𝕃 char) → 𝕃 (INTERN-TRIE A) → 𝕃 char → is-empty lchars ≡ ff → 𝕃 (INTERN-TRIE A)
 
 
-handle-intern-letter : (lchars : 𝕃 char) → 𝕃 INTERN-TRIE → 𝕃 char → length lchars > 1 ≡ tt → 𝕃 INTERN-TRIE
+handle-intern-letter :  ∀{ℓ}{A : Set ℓ} → (lchars : 𝕃 char) → 𝕃 (INTERN-TRIE A) → 𝕃 char → length lchars > 1 ≡ tt → 𝕃 (INTERN-TRIE A)
 
 
-handle-last-letter : (lchars : 𝕃 char) → 𝕃 INTERN-TRIE → 𝕃 char → length lchars ≡ 1 → 𝕃 INTERN-TRIE
+handle-last-letter :  ∀{ℓ}{A : Set ℓ} → (lchars : 𝕃 char) → 𝕃 (INTERN-TRIE A) → 𝕃 char → length lchars ≡ 1 → 𝕃 (INTERN-TRIE A)
 
 
 --handle-last-letter : (lchars : 𝕃 char) → 𝕃 INTERN-TRIE → 𝕃 char → is-empty lchars ≡ ff → 𝕃 INTERN-TRIE
@@ -133,7 +132,7 @@ create-children (x :: y :: list-chars) list-tries up-to-prefix list-chars-not-em
 
 
 -- takes in the root trie, a list of input characters, a proof stating that the list of input characters is not empty, and returns a new root-trie
-insert-string-into-trie : ROOT-TRIE → (lchars : 𝕃 char) → is-empty lchars ≡ ff → ROOT-TRIE
+insert-string-into-trie :  ∀{ℓ}{A : Set ℓ} → ROOT-TRIE A → (lchars : 𝕃 char) → is-empty lchars ≡ ff → ROOT-TRIE A
 insert-string-into-trie (Node root-children) list-chars not-empty-chars = Node (create-children list-chars root-children [] not-empty-chars)
 
 
@@ -180,13 +179,13 @@ Store length of the longest word in the root node, pass current depth or some sh
 way agda knows the depth is decreasing and the calls will eventually stop...
 
 -}
-pre-order-helper : INTERN-TRIE → 𝕃 (𝕃 char)
+pre-order-helper :  ∀{ℓ}{A : Set ℓ} → INTERN-TRIE A → 𝕃 (𝕃 char)
 pre-order-helper (Node character end? [] prefix) = []
 pre-order-helper (Node character end? ((Node first-char first-end first-children first-prefix) :: children) prefix) with first-end
 ... | tt =  {!!} -- foldr _++_ (first-prefix :: []) (map pre-order-helper first-children)
 ... | ff = {!!} -- foldr _++_ [] (map pre-order-helper first-children)
 
-pre-order : ROOT-TRIE → 𝕃 (𝕃 char)
+pre-order :  ∀{ℓ}{A : Set ℓ} → ROOT-TRIE A → 𝕃 (𝕃 char)
 pre-order (Node []) = []
 pre-order (Node ((Node first-char first-end first-children first-prefix) :: children)) with first-end
 ... | tt = {!!}
@@ -195,12 +194,9 @@ pre-order (Node ((Node first-char first-end first-children first-prefix) :: chil
 -- (foldr _++_ (first-prefix :: []) (map pre-order-helper first-children))
 
 
-{-
-IDEA : quantifty root-trie / intern-trie over all A : Set?
-Potentially solves the problem
--}
-traversal-is-sorted : list-is-sorted (pre-order ROOT-TRIE) ≡ tt
-traversal-is-sorted = ?
+-- see if a traversal is sorted
+traversal-is-sorted : ∀{ℓ}{A : Set ℓ} → (all-roots : ROOT-TRIE A) → list-is-sorted(pre-order all-roots) ≡ tt
+traversal-is-sorted = {!!}
 
 
 
