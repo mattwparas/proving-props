@@ -107,7 +107,7 @@ handle-last-letter (x :: []) ((Node first-char first-end first-children first-pr
 ... | tt = (Node x tt [] (prefix-chars ++ x :: [])) :: (Node first-char first-end first-children first-prefix) :: ltries -- when the characters are < 
 ... | ff with x =char first-char
 ... | tt = (Node x tt first-children (prefix-chars ++ x :: [])) :: ltries -- please check this (when the characters are equal)
-... | ff = (Node first-char first-end first-children first-prefix) :: (create-children (x :: []) ltries prefix-chars {!!}) -- this should be the else case -- see how the hole is actually refl
+... | ff = (Node first-char first-end first-children first-prefix) :: (create-children (x :: []) ltries prefix-chars refl) -- this should be the else case -- see how the hole is actually refl
 handle-last-letter (x :: y :: lchars) ltries prefix-chars ()
 
 -- maybe need to pass along the proof that the list of characters > one element
@@ -116,9 +116,9 @@ handle-last-letter (x :: y :: lchars) ltries prefix-chars ()
 -- START DEFINITIONS FOR HANDLING INTERNAL LETTERS HERE
 handle-intern-letter [] ltries prefix-chars ()
 handle-intern-letter (x :: []) ltries prefix-chars ()
-handle-intern-letter (x :: y :: lchars) [] prefix-chars lchars>1 = {!!}
+handle-intern-letter (x :: y :: lchars) [] prefix-chars lchars>1 = (Node x ff (create-children (y :: lchars) [] (prefix-chars ++ x :: []) refl) (prefix-chars ++ x :: [])) :: [] -- refl fits here, when children are empty
 handle-intern-letter (x :: y :: lchars) ((Node first-char first-end first-children first-prefix) :: ltries) prefix-chars lchars>1 with x <char first-char
-... | tt = {!!} -- character is less than
+... | tt = (Node x ff (create-children (y :: lchars) [] (prefix-chars ++ x :: []) refl ) (prefix-chars ++ x :: []))  :: (Node first-char first-end first-children first-prefix) :: ltries -- character is less than
 ... | ff with x =char first-char
 ... | tt = {!!} -- characters are the same
 ... | ff = {!!} -- else case
