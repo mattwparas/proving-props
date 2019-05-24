@@ -76,12 +76,20 @@ _intern-trie<list_ : ∀{ℓ}{A : Set ℓ}
                    → 𝕃 (INTERN-TRIE A lst)
                    → 𝔹
 
-_intern-trie<list_ (Node character end? children prefix {prefix-same-proof}) [] = tt
-_intern-trie<list_ (Node character end? children prefix {prefix-same-proof}) ((Node first-char first-end? first-children first-prefix {first-prefix-same-proof}) :: rest-list) with character <char first-char
+_intern-trie<list_ (Node character end? children prefix {prefix-same-proof})
+                   [] = tt
+_intern-trie<list_ (Node character end? children prefix {prefix-same-proof})
+                   ((Node first-char first-end? first-children first-prefix {first-prefix-same-proof}) :: rest-list) with character <char first-char
 ... | tt = (Node character end? children prefix {prefix-same-proof}) intern-trie<list rest-list
 ... | ff = ff
 
-intern-children-are-sorted :  ∀{ℓ}{A : Set ℓ} → ∀ {lst : 𝕃 char} → INTERN-TRIE A lst → 𝔹
+
+
+
+intern-children-are-sorted :  ∀{ℓ}{A : Set ℓ}
+                           → ∀ {lst : 𝕃 char}
+                           → INTERN-TRIE A lst
+                           → 𝔹
 intern-children-are-sorted (Node character end? [] prefix {proof}) = tt
 intern-children-are-sorted (Node character end? (first-trie :: children) prefix {proof}) with first-trie intern-trie<list children
 ... | tt = intern-children-are-sorted (Node character end? children prefix {proof})
@@ -188,9 +196,26 @@ handle-last-letter (x :: y :: lchars) ltries prefix-chars ()
 
 -- START DEFINITIONS FOR CREATE CHILDREN HERE
 create-children [] up-to-prefix list-tries ()
-create-children (x :: []) up-to-prefix list-tries list-chars-not-empty = handle-last-letter (x :: []) up-to-prefix list-tries (list-one-element-length-equal-1 x)
-create-children (x :: y :: word) up-to-prefix list-tries list-chars-not-empty = handle-intern-letter (x :: y :: word) up-to-prefix list-tries (list-more-than-one-element-length>1 x y word)
+create-children (x :: [])
+                up-to-prefix
+                list-tries
+                list-chars-not-empty = (handle-last-letter (x :: [])
+                                                           up-to-prefix
+                                                           list-tries
+                                                           (list-one-element-length-equal-1 x))
+create-children (x :: y :: word)
+                up-to-prefix
+                list-tries
+                list-chars-not-empty = (handle-intern-letter (x :: y :: word)
+                                                             up-to-prefix list-tries
+                                                             (list-more-than-one-element-length>1 x y word))
 
+{-
+create-children [] up-to-prefix list-tries ()
+create-children (x :: word) up-to-prefix list-tries list-chars-not-empty with keep (length word =ℕ 0)
+... | tt , len≡0 = {!handle-last-letter (x :: []) up-to-prefix list-tries len≡0!}
+... | ff , len!≡0 = {!!} 
+-}
 
 -- takes in the root trie, a list of input characters, a proof stating that the list of input characters is not empty, and returns a new root-trie
 insert-string-into-trie :  ∀{ℓ}{A : Set ℓ}
@@ -198,7 +223,8 @@ insert-string-into-trie :  ∀{ℓ}{A : Set ℓ}
                         → (lchars : 𝕃 char)
                         → is-empty lchars ≡ ff -- the 'contract' saying that the inserted word is not empty
                         → ROOT-TRIE A
-insert-string-into-trie (Node root-children) list-chars not-empty-chars = Node (create-children list-chars [] root-children not-empty-chars)
+insert-string-into-trie (Node root-children)
+                        list-chars not-empty-chars = Node (create-children list-chars [] root-children not-empty-chars)
 
 
 
@@ -279,9 +305,23 @@ every member of l2 is in l1
 uniqueness...
 -}
 
+is-member : 𝕃 char → 𝕃 (𝕃 char) → 𝔹
+is-member character [] = ff
+is-member character (x :: lst) with character list-char= x
+... | tt = tt
+... | ff = is-member character lst
+
+
+every-element-in-list : 𝕃 (𝕃 char) → 𝕃 (𝕃 char) → 𝔹
+every-element-in-list [] l2 = tt
+every-element-in-list (x :: l1) l2 with is-member x l2
+... | tt = every-element-in-list l1 l2
+... | ff = ff
+
 
 is-permutation : 𝕃 (𝕃 char) → 𝕃 (𝕃 char) → 𝔹
-is-permutation = {!!}
+is-permutation l1 l2 = (length l1 =ℕ length l2) && (every-element-in-list l1 l2) && (every-element-in-list l2 l1)
+
 
 
 -- Here is the sorting function, right now it does nothing
