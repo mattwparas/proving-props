@@ -34,32 +34,35 @@ open import empty
 open import list
 open import list-thms
 
---open import negation
 
-
-
-data INTERN-TRIE {ℓ}(A : Set ℓ) : Set where
-  Node :
+data INTERN-TRIE {ℓ}(A : Set ℓ) : 𝕃 char →  Set where
+  Node : ∀ { lst : 𝕃 char } → 
       (character : char)
     → (end? : 𝔹)
-    → (children : 𝕃 (INTERN-TRIE A))
+    → (children : 𝕃 (INTERN-TRIE A (lst ++ character :: []))) -- define the children as a list tries with type prefix + char
     → (prefix : 𝕃 char)
-      → INTERN-TRIE A
+      → INTERN-TRIE A lst
+
 
 
 data ROOT-TRIE {ℓ}(A : Set ℓ): Set where
-  Node : (children : 𝕃 (INTERN-TRIE A))
+  Node : ∀ { lst : 𝕃 char } (children : 𝕃 (INTERN-TRIE A lst ))
       → ROOT-TRIE A
 
 
-
-
 -- an empty trie
-empty-root-trie : ∀{ℓ}{A : Set ℓ} → ROOT-TRIE A
-empty-root-trie = (Node [])
+
+{-
+empty-root-trie : ∀{ℓ}{A : Set ℓ} → ∀ {lst : 𝕃 char} → ROOT-TRIE A
+empty-root-trie = (Node []) -- TODO what is going on here
+-}
 
 
-_intern-trie<list_ : ∀{ℓ}{A : Set ℓ} → INTERN-TRIE A → 𝕃 (INTERN-TRIE A) → 𝔹
+empty-root-trie : ∀{ℓ}{A : Set ℓ} → ∀ {lst : 𝕃 char} → ROOT-TRIE A
+empty-root-trie = ? -- TODO what is going on here
+
+
+_intern-trie<list_ : ∀{ℓ}{A : Set ℓ} → ∀ {lst : 𝕃 char} → {a : char} → INTERN-TRIE A lst → 𝕃 (INTERN-TRIE A (lst ++ a :: [])) → 𝔹
 _intern-trie<list_ (Node character end? children prefix) [] = tt -- is this valid?
 _intern-trie<list_ (Node character end? children prefix) ((Node first-char first-end? first-children first-prefix) :: rest-list) with character <char first-char
 ... | tt = (Node character end? children prefix) intern-trie<list rest-list
@@ -77,6 +80,13 @@ root-children-are-sorted (Node []) = tt
 root-children-are-sorted (Node (first-trie :: children)) with first-trie intern-trie<list children
 ... | tt = root-children-are-sorted (Node children) -- double check this
 ... | ff = ff -- exit here
+
+
+
+-- TODO
+well-formed-trie :  ∀{ℓ}{A : Set ℓ} → ROOT-TRIE A → 𝔹
+well-formed-trie (Node []) = ff
+well-formed-trie (Node (x :: children)) = {!!}
 
 
 
@@ -199,8 +209,21 @@ traversal-is-sorted : ∀{ℓ}{A : Set ℓ} → (all-roots : ROOT-TRIE A) → li
 traversal-is-sorted = {!!}
 
 
+-- prefix at node is the same as the path to that node
+-- prefix-stub-here .............
 
 
+{-
+permutation stuff
+
+lengths are equal
+
+every member of l1 is in l2
+
+every member of l2 is in l1
+
+uniqueness...
+-}
 
 
 
