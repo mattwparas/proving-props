@@ -1,21 +1,23 @@
 {- 
 
-Proving the correctness of sorting using a trie data structure
+Proving the correctness of sorting using a trie data structure in ~agda~
 
-Alexandra Grimes and Matthew Paras
+Starring:
+
+  Alexandra Grimes 
+      
+        and 
+    
+   Matthew Paras
 
 Date : 5/24/19
 
 -}
 
-open import bool
 open import char
-open import list
 open import maybe
-open import product
 open import string
 open import unit
-
 open import level
 open import eq
 open import nat
@@ -37,7 +39,9 @@ _list-char=_ : 𝕃 char → 𝕃 char → 𝔹
 _list-char=_ [] [] = tt
 _list-char=_ (x :: l1) [] = ff
 _list-char=_ [] (y :: l2) = ff
-_list-char=_ (x :: l1) (y :: l2) = _list-char=_ l1 l2
+_list-char=_ (x :: l1) (y :: l2) with x =char y
+... | tt = _list-char=_ l1 l2
+... | ff = ff
 
 
 
@@ -227,6 +231,41 @@ insert-string-into-trie (Node root-children)
                         list-chars not-empty-chars = Node (create-children list-chars [] root-children not-empty-chars)
 
 
+--list-with-at-least-one-element-
+
+all-words-not-empty : 𝕃 (𝕃 char) → 𝔹
+all-words-not-empty [] = tt -- come back to this
+all-words-not-empty ([] :: rest-words) = ff
+all-words-not-empty ((first-char :: rest-chars) :: rest-words) = all-words-not-empty rest-words
+
+-- need helper lemma here about
+-- all-words-not-empty -> first word not empty
+
+
+
+
+
+insert-lstrings-into-trie : ∀{ℓ}{A : Set ℓ} → ROOT-TRIE A → (lst : 𝕃 (𝕃 char)) → is-empty lst ≡ ff → all-words-not-empty lst ≡ tt → ROOT-TRIE A
+insert-lstrings-into-trie rooted-trie [] ()
+insert-lstrings-into-trie rooted-trie (first-word :: []) lst-not-empty words-not-empty = insert-string-into-trie rooted-trie first-word {!!}
+insert-lstrings-into-trie rooted-trie (first-word :: second-word :: rest-word-list) lst-not-empty words-not-empty = insert-lstrings-into-trie (insert-string-into-trie rooted-trie first-word {!!}) (second-word :: rest-word-list) refl {!!}
+
+
+
+{-
+
+;; contract: trie? (listof string?) -> trie?
+(define (build-trie-from-list-of-words trie list-of-words)
+  (cond
+    [(= (length list-of-words) 1)
+      (insert trie (first list-of-words))]
+    [else
+      (build-trie-from-list-of-words
+        (insert trie (first list-of-words))
+          (rest list-of-words))]))
+
+-}
+
 
 
 -- TODO check up on the function definitions here
@@ -260,7 +299,8 @@ pre-order-helper = {!!}
 
 
 pre-order : ∀{ℓ}{A : Set ℓ} → ROOT-TRIE A → 𝕃 (𝕃 char)
-pre-order = {!!}
+pre-order (Node []) = []
+pre-order (Node (x :: children)) = {!!}
 
 
 {-
@@ -283,9 +323,7 @@ pre-order (Node ((Node first-char first-end first-children first-prefix) :: chil
 
 -}
 
--- see if a traversal is sorted
-traversal-is-sorted : ∀{ℓ}{A : Set ℓ} → (all-roots : ROOT-TRIE A) → list-is-sorted(pre-order all-roots) ≡ tt
-traversal-is-sorted = {!!}
+
 
 
 
@@ -321,6 +359,37 @@ every-element-in-list (x :: l1) l2 with is-member x l2
 
 is-permutation : 𝕃 (𝕃 char) → 𝕃 (𝕃 char) → 𝔹
 is-permutation l1 l2 = (length l1 =ℕ length l2) && (every-element-in-list l1 l2) && (every-element-in-list l2 l1)
+
+
+-- uniqueness...
+
+
+-- see if a traversal is sorted
+traversal-is-sorted : ∀{ℓ}{A : Set ℓ} → (all-roots : ROOT-TRIE A) → list-is-sorted(pre-order all-roots) ≡ tt
+traversal-is-sorted (Node []) = refl
+traversal-is-sorted (Node (first :: children)) = {!!}
+
+
+
+
+
+-- traversal-is-a-permutation : ∀{ℓ}{A : Set ℓ} → (all-roots : ROOT-TRIE A)
+
+{-
+traversal-is-a-permutation : ∀{ℓ}{A : Set ℓ} → (all-roots : ROOT-TRIE A) → is-permutation(pre-order all-roots)
+traversal-is-a-permutation = {!!}
+-}
+
+-- input l1
+-- build trie from l1
+-- l2 = get words out of trie
+-- compare l1 and l2
+
+-- type at node is same as path to get there
+
+
+
+
 
 
 
