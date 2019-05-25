@@ -41,29 +41,29 @@
   (require rackunit)
   (check-true (string? (make-a-string alphabet)))
   (check-true 
-    ((listof string?)
+   ((listof string?)
     (make-random-list-of-strings alphabet)))
   (check-true 
-    ((listof string?)
+   ((listof string?)
     (make-random-list-of-unique-strings alphabet))))
 
 
 (define random-trie-tests
   (test-suite
-    "Tests for randomly building tries"
-    (test-case "First random test"
-      (for ([i 5000])
-        (build-trie-from-list-of-words 
-          empty-trie
-          (make-random-list-of-unique-strings alphabet))))))
+   "Tests for randomly building tries"
+   (test-case "First random test"
+              (for ([i 5000])
+                (build-trie-from-list-of-words 
+                 empty-trie
+                 (make-random-list-of-unique-strings alphabet))))))
 
 (define random-sort-tests
   (test-suite
-    "Tests for randomly sorting lists of strings"
-    (test-case "First random test"
-      (for ([i 5000])
-        (define strings (make-random-list-of-unique-strings alphabet)) 
-        (trie-sort strings)))))
+   "Tests for randomly sorting lists of strings"
+   (test-case "First random test"
+              (for ([i 5000])
+                (define strings (make-random-list-of-unique-strings alphabet)) 
+                (trie-sort strings)))))
 
 ;; these require some refinement
 (define random-lookup-tests
@@ -88,8 +88,8 @@
 
 (define tree-is-deterministic
   (test-suite
-    "Test to see if insert produces the same sorted list with a different insertion order"
-    (test-case "Deterministic test"
+   "Test to see if insert produces the same sorted list with a different insertion order"
+   (test-case "Deterministic test"
               (for ([i 100])
                 (define list-of-strings (make-random-list-of-unique-strings alphabet))
                 (define shuffled-list-of-strings (shuffle list-of-strings))
@@ -101,17 +101,17 @@
 
 (define trie-construction-returns-the-same-tree
   (test-suite
-    "Test to see if inserting the same words in the same order produces the samea tree"
-      (test-case "Same tree test"
-        (for ([i 100])
-          (define list-of-strings (make-random-list-of-unique-strings alphabet))
-          (define trie1 (build-trie-from-list-of-words
-            empty-trie
-            list-of-strings))
-          (define trie2 (build-trie-from-list-of-words
-            empty-trie
-            list-of-strings))
-          (check-true (equal? trie1 trie2))))))
+   "Test to see if inserting the same words in the same order produces the samea tree"
+   (test-case "Same tree test"
+              (for ([i 100])
+                (define list-of-strings (make-random-list-of-unique-strings alphabet))
+                (define trie1 (build-trie-from-list-of-words
+                               empty-trie
+                               list-of-strings))
+                (define trie2 (build-trie-from-list-of-words
+                               empty-trie
+                               list-of-strings))
+                (check-true (equal? trie1 trie2))))))
 
 ;; test suite
 (run-tests random-trie-tests)
