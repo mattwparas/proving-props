@@ -32,22 +32,25 @@ data BottomC : char where
 <bottom = ?
 -}
 
+{-
 data SingletonList : 𝕃 char → Set where
   slist : ∀ {l : 𝕃 char}
           → {length l =N 1 ≡ tt}
           → SingletonList l
 
+
 <SingletonChar : ∀ {c1 c2 : char} → c1 → c2 → 𝔹
 <SingletonChar {c1} {c2} sl1 sl2 = {!!}
+-}
 
 
 data Trie : 𝕃 char -> Set
-data Link : 𝕃 char -> Set
+data Link : char → 𝕃 char -> Set
 data LinkList : char → 𝕃 char → Set
 
 -- link-list of links
 data Trie where
-  node : ∀ {l : 𝕃 char} → ∀ {c : char} 
+  node : ∀ {l : 𝕃 char} {c : char} 
          → (wordp : bool)
          → (children : LinkList c l)
          → Trie l
@@ -55,26 +58,49 @@ data Trie where
 data Link where
   link : ∀ (c : char) { l : 𝕃 char }
          → (child : Trie (l ++ ( c :: [])))
-         → Link l
+         → Link c l
 
 data LinkList where
-  ll[] : ∀ (c : char) → ∀ (l : 𝕃 char) → LinkList c l
+  ll[] : ∀ {c : char} → ∀ (l : 𝕃 char) → LinkList c l
   _ll::_ : ∀ {l : 𝕃 char}
          → ∀ {c c' : char}
          → {c<c' : c <char c' ≡ tt}
-         → Link l -- (child Trie (l ++  (c :: []))
+      --   → Link l -- (child Trie (l ++  (c :: []))
+         → Link c l
          → LinkList c' l
          → LinkList c l
+
+data BST : ℕ -> ℕ -> Set where
+  leaf : ∀ {n m} -> {n≤m : n ≤ m ≡ tt} -> BST n m
+  node : ∀ {l' l u' u}
+      -> (n : ℕ) -> (left : BST l' n) -> (right : BST n u')
+      -> {l≤l' : l ≤ l' ≡ tt} -> {u'≤u : u' ≤ u ≡ tt}
+      -> BST l u
 
 
 
 testLinkList : LinkList 'a' ('b' :: []) ≡ LinkList 'a' ('b' :: [])
 testLinkList = refl
 
+
+list[] : ∀ {c : char} → (l : 𝕃 char) →  LinkList c l
+list[] l = ll[] l
+
 {-
-testLL[] : (ll[] 'a' ('b' :: [])) ≡ LinkList 'a' ('b' :: [])
-testLL[] = ?
+l1 : {c : char} → (l : 𝕃 char) → LinkList c l
+l1 c l = (link c (node tt (l ++ ('a' :: [])))) ll:: ll[]
 -}
+
+t0 : ∀ {c : char} → Trie []
+t0 {c} = node ff (ll[] {c} [])
+
+t1 : ∀ {c : char} → Trie []
+t1 {c} = node tt (ll[] {c} [])
+
+t2 : ∀ {c : char} → Trie []
+t2 {c} = node ff (link 'a' (node tt (ll[] ('a' :: []))) ll:: (ll[] []))
+
+
 
 {-
 testLLCons : {'b' :: []} → {'b' 'a'} → {'a' <char 'b' ≡ tt} → (link 'a' ('b' :: [])) ll:: (LinkList 'b' ('b' :: []))
