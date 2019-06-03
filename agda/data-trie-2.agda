@@ -419,8 +419,59 @@ helper-string<lemma (x :: l) c proof rewrite &&-fst { (x =char2 x) } { =string l
 
 
 <char-trans : ∀ {c1 c2 c3 : char} → c1 <char2 c2 ≡ tt → c2 <char2 c3 ≡ tt → c1 <char2 c3 ≡ tt
-<char-trans {c1} {c2} {c3} p1 p2 = {!!}
+<char-trans {c1} {c2} {c3} p1 p2 = ≤-trans {primCharToNat c1} {primCharToNat c2} {primCharToNat c3} p1 p2
 
+
+-- <-trans : ∀ {x y z : ℕ} → x < y ≡ tt → y < z ≡ tt → x < z ≡ tt
+
+||-over-&&-l2 : ∀ {a b c : 𝔹} → a || (b && c) ≡ tt → (a || b) && (a || c) ≡ tt
+||-over-&&-l2 {a} {b} {c} p rewrite ||-over-&&-l a b c = p
+
+
+a-||-b-||-b : ∀ (a b : 𝔹) → (a || b) || b ≡ (a || b)
+a-||-b-||-b tt tt = refl
+a-||-b-||-b tt ff = refl
+a-||-b-||-b ff tt = refl
+a-||-b-||-b ff ff = refl
+
+||-over-b : ∀ {a b : 𝔹} → (a || b) || b ≡ tt → (a || b) ≡ tt
+||-over-b {a} {b} p rewrite a-||-b-||-b a b = p 
+
+
+<char||=char : ∀ (c1 c2 : char) → (c1 <char2 c2) || (c1 =char2 c2) ≡ (c1 <char2 c2)
+<char||=char c1 c2 = (a-||-b-||-b (primCharToNat c1 < primCharToNat c2) (primCharToNat c1 =ℕ primCharToNat c2))
+
+
+{-
+&&-snd2 : {p1 p2 : 𝔹} → p1 && p2 ≡ tt → p2 ≡ tt
+&&-snd2 {tt} p = p
+&&-snd2 {ff} ()
+-}
+
+
+reduction : ∀ (a b c : 𝔹) → (a || b) || b && c ≡ a || b
+reduction tt tt tt = refl
+reduction tt tt ff = refl
+reduction tt ff tt = refl
+reduction tt ff ff = refl
+reduction ff tt tt = refl
+reduction ff tt ff = refl
+reduction ff ff tt = refl
+reduction ff ff ff = refl
+
+reductionP : ∀ {a b c : 𝔹} → (a || b) || b && c ≡ tt → a || b ≡ tt
+reductionP {a} {b} {c} p rewrite reduction a b c = p
+
+{-
+back-to-char< : ∀ (a b : char) → (primCharToNat a < primCharToNat b) || (primCharToNat a =ℕ primCharToNat b) ≡ a <char2 b
+back-to-char< a b = refl
+
+char<-to-back : ∀ (a b : char) → a <char2 b ≡ (primCharToNat a < primCharToNat b) || (primCharToNat a =ℕ primCharToNat b)
+char<-to-back a b = refl
+
+char<-to-P : ∀ {a b : char} → a <char2 b ≡ tt → (primCharToNat a < primCharToNat b) || (primCharToNat a =ℕ primCharToNat b) ≡ tt
+char<-to-P {a} {b} p rewrite char<-to-back a b = p
+-}
 
 <string-trans : ∀ (l1 l2 l3 : 𝕃 char) → l1 string< l2 ≡ tt → l2 string< l3 ≡ tt → l1 string< l3 ≡ tt
 <string-trans [] [] [] l1<l2 l2<l3 = refl
@@ -430,7 +481,56 @@ helper-string<lemma (x :: l) c proof rewrite &&-fst { (x =char2 x) } { =string l
 <string-trans (x :: l1) [] [] ()
 <string-trans (x :: l1) [] (x₁ :: l3) ()
 <string-trans (x :: l1) (x₁ :: l2) [] l1<l2 ()
-<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 rewrite ||-over-&&-l (x <char2 z) (x =char2 z) (l1 string< l3)= {!!}
+<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 rewrite
+  reduction (primCharToNat x < primCharToNat z) (primCharToNat x =ℕ primCharToNat z) (l1 string< l3) =  <char-trans {x} {y} {z} (reductionP { primCharToNat x < primCharToNat y } { primCharToNat x =ℕ primCharToNat y } { l1 string< l2 } l1<l2) (reductionP { primCharToNat y < primCharToNat z } { primCharToNat y =ℕ primCharToNat z } { l2 string< l3 } l2<l3)
+
+
+-- ≤-trans (reductionP l1<l2) (reductionP l2<l3)
+
+{-
+
+<string-trans : ∀ (l1 l2 l3 : 𝕃 char) → l1 string< l2 ≡ tt → l2 string< l3 ≡ tt → l1 string< l3 ≡ tt
+<string-trans [] [] [] l1<l2 l2<l3 = refl
+<string-trans [] [] (x :: l3) l1<l2 l2<l3 = refl
+<string-trans [] (x :: l2) [] l1<l2 l2<l3 = refl
+<string-trans [] (x :: l2) (x₁ :: l3) l1<l2 l2<l3 = refl
+<string-trans (x :: l1) [] [] ()
+<string-trans (x :: l1) [] (x₁ :: l3) ()
+<string-trans (x :: l1) (x₁ :: l2) [] l1<l2 ()
+<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 rewrite
+  ||-over-&&-l (x <char2 z) (x =char2 z) (l1 string< l3)
+  | (a-||-b-||-b (primCharToNat x < primCharToNat z) (primCharToNat x =ℕ primCharToNat z)) {-
+  | &&-fst (||-over-b (||-over-&&-l2 (<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3))) -} = {! ||-over-&&-l2 (<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3)!}
+-}
+
+{-
+
+&&-fst : {p1 p2 : 𝔹} → p1 && p2 ≡ tt → p1 ≡ tt
+&&-fst{tt} p = refl
+&&-fst{ff} ()
+
+-}
+
+{-
+
+||-over-&&-l2 (<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3)
+
+((primCharToNat x < primCharToNat z ||
+        primCharToNat x =ℕ primCharToNat z)
+       || primCharToNat x =ℕ primCharToNat z)
+      &&
+      ((primCharToNat x < primCharToNat z ||
+        primCharToNat x =ℕ primCharToNat z)
+       || (l1 string< l3))
+      ≡ tt
+
+-}
+
+
+
+-- <char-trans (||-over-b (&&-snd (||-over-&&-l2 l1<l2)))
+
+-- rewrite ||-over-&&-l (x <char2 z) (x =char2 z) (l1 string< l3) 
 
 string<string+c2 : ∀ (l1 : 𝕃 char) (c : char) → l1 string< (l1 ++ c :: []) ≡ tt
 string<string+c2 [] c = refl
@@ -441,7 +541,30 @@ string<string+c : ∀ (l1 l2 : 𝕃 char) (c : char) → (l1 ++ c :: []) string<
 string<string+c [] [] c proof = refl
 string<string+c [] (x :: l2) c proof = refl
 string<string+c (x :: l1) [] c ()
-string<string+c (x :: l1) (firstchar :: l2) c proof = {!!}
+string<string+c (x :: l1) (firstchar :: l2) c proof = <string-trans (x :: l1) (x :: l1 ++ c :: []) (firstchar :: l2) (string<string+c2 (x :: l1) c) proof
+
+
+
+
+-- <string-trans (x :: l1) (x :: l1 ++ c :: []) (firstchar :: l1) (string<string+c2 (x :: l1) c) proof
+
+{-
+
+
+Goal: ((x :: l1) string< (firstchar :: l2)) ≡ tt
+
+
+proof     : (((x :: l1) ++ c :: []) string< (firstchar :: l2)) ≡ tt
+
+
+Also have : (x :: l1) string< (x :: l1 ++ c :: [])
+
+
+
+-}
+
+
+-- &&-snd {x <char2 firstchar || x =char2 firstchar} {l1 string< l2} (string<string+c (x :: l1) (firstchar :: l2) c proof)
 
 {-
 
@@ -652,9 +775,6 @@ _link<_ : ∀ {l : 𝕃 char} → Link l → Link l → 𝔹
 _link<_ {l} (link c1 child1) (link c2 child2) = c1 <char2 c2
 -}
 
-other-helper-lemma : ∀ (lst : 𝕃 (𝕃 char)) → [] string<list lst ≡ tt
-other-helper-lemma [] = refl
-other-helper-lemma (lst :: lst₁) = refl
 
 helper-lemma : ∀ (l : 𝕃 char) (lst : 𝕃 (𝕃 char)) → l string<list lst ≡ tt → list-is-sorted (l :: lst) ≡ list-is-sorted lst
 helper-lemma [] [] l<lst = refl
@@ -665,13 +785,6 @@ helper-lemma (x :: l) (first :: rest) l<lst rewrite l<lst = refl
 -- want to say that the efirst of the output of wordst (l ++ c :: []) will contain c
 
 
-append-empty :  ∀ (l : 𝕃 char) (lst : 𝕃 (𝕃 char)) → l string<list (lst ++ []) ≡ l string<list lst
-append-empty [] [] = refl
-append-empty [] (first :: rest) = refl
-append-empty (x :: l) [] = refl
-append-empty (x :: l) (first :: rest) with (x :: l) string< first
-... | tt = append-empty (x :: l) rest
-... | ff = refl
 
 
 --helper-5-lemma : ∀ (l : 𝕃 char) → (t : Trie (l)) → wordst l t ≡ wordsl l 
