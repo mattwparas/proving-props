@@ -628,7 +628,7 @@ final-sortsl (x :: l) (link c child :: rest-links) = {!!}
 -}
 
 
-{-
+
 {-
 sorted-lemma : ∀ {l : 𝕃 char} {lnk : 𝕃 (Link l)} {t : Trie l} → IsSorted lnk → list-is-sorted (wordst l t) ≡ tt
 sorted-lemma {l} {lnk} {t} sorted = {!!}
@@ -639,10 +639,11 @@ sorted-lemma {l} {lnk} {t} sorted = {!!}
 --final-sort : ∀ {l : 𝕃 char} → (t : Trie l) → (lst : wordst l t) → list-is-sorted lst ≡ tt
 --final-sort = ?
 
+{-
 cons-empty-sorting : ∀ (l : 𝕃 (𝕃 char)) → list-is-sorted ([] :: l) ≡ list-is-sorted l
 cons-empty-sorting [] = refl
 cons-empty-sorting (l :: lst) = refl
-
+-}
 
 --<*lemma : link l ≤* 𝕃 link l → c1 from link l
 
@@ -684,72 +685,24 @@ append-empty (x :: l) (first :: rest) with (x :: l) string< first
 
 -- wordst : ∀ l -> (t : Trie l) -> 𝕃 (𝕃 char)
 
+{-
 helper-5-lemma : ∀ (l : 𝕃 char) (c : char) (t : (Trie (l ++ c :: []))) → l string<list (wordst (l ++ c :: []) t) ≡ tt
 helper-5-lemma [] c t = other-helper-lemma (wordst (c :: []) t)
 helper-5-lemma (x :: l) c t with keep ((x :: l) string< (head (wordst ((x :: l) ++ c :: []) t ) {!!}))
 ... | tt , xl<f = {!!}
 ... | ff , ()
+-}
+
 
 -- define the behavior of wordst for a given l and l further
 
-helper-4-lemma : ∀ (l : 𝕃 char) (c : char) (child : Trie (l ++ c :: [])) → l string<list (wordst (l ++ c :: []) child ++ []) ≡ tt
-helper-4-lemma [] c child = other-helper-lemma (wordst (c :: []) child ++ [])
-helper-4-lemma (x :: l) c (node wordp [] s[]) rewrite append-empty (x :: l) (wordst (x :: l ++ c :: []) (node wordp [] s[])) = {!!}
-helper-4-lemma (x :: l) c (node wordp (first-link :: children) isSorted) rewrite append-empty (x :: l) (wordst (x :: l ++ c :: []) (node wordp (first-link :: children) isSorted))  = {!!}
 
 
 
-final-sort : ∀ (l : 𝕃 char) (t : Trie l) → list-is-sorted (wordst l t) ≡ tt
-final-sortsl : ∀ (l : 𝕃 char) (lst : 𝕃 (Link l)) → list-is-sorted (wordsl l lst) ≡ tt
 
 
 
-sorting-lemma : ∀ (c : char)
-                (l : 𝕃 char)
-                (child : Trie (l ++ c :: []))
-                (rest-links : 𝕃 (Link l))
-                → l string<list ((wordst (l ++ c :: []) child) ++ (wordsl l rest-links)) ≡ tt
-sorting-lemma c [] child rest-links = other-helper-lemma (wordst (c :: []) child ++ wordsl [] rest-links)
-sorting-lemma c (x :: l) child rest-links = {!!}
 
-
-helper-2-lemma : ∀ (l : 𝕃 char) → (lnk : Link l) → (children : 𝕃 (Link l)) → lnk ≤* children → l string<list (wordsl l) (lnk :: children) ≡ tt
-helper-2-lemma [] lnk children lnk<children = other-helper-lemma (wordsl [] (lnk :: children))
-helper-2-lemma (x :: l) (link c child) [] <[] = helper-4-lemma (x :: l) c child
-helper-2-lemma (x :: l) (link c child) (first-link :: children) (lnk <:: lnk<children) = sorting-lemma c (x :: l) child (first-link :: children) 
-
-final-sort [] (node tt [] s[]) = refl
-final-sort [] (node ff [] s[]) = refl
-final-sort [] (node tt (link1 :: children) (first s:: rest)) rewrite cons-empty-sorting (wordsl [] (link1 :: children)) = final-sortsl [] (link1 :: children) 
-final-sort [] (node ff (link1 :: children) (first s:: rest)) = final-sortsl [] (link1 :: children)    -------------------------------------------------- ^^^^ These two are now the same case
-final-sort (x :: l) (node tt [] s[]) = refl
-final-sort (x :: l) (node ff [] s[]) = refl
-final-sort (x :: l) (node tt (link1 :: children) (first s:: rest)) rewrite helper-lemma (x :: l) (wordsl ( x :: l) (link1 :: children)) ((helper-2-lemma (x :: l) link1 children first)) = final-sortsl (x :: l) (link1 :: children)
-final-sort (x :: l) (node ff (link1 :: children) (first s:: rest)) = final-sortsl (x :: l) (link1 :: children)
-
-
-
-{-
-
-([] string<list
-       (wordst (c :: []) child ++ wordsl [] rest-links))
-      ≡ tt
-
--}
-
-
-{-
-Goal: list-is-sorted
-      (wordst (c :: []) child ++ wordsl [] rest-links)
-      ≡ tt
--}
-
-final-sortsl [] [] = refl
-final-sortsl [] (link c child :: rest-links) = {!!}
-final-sortsl (x :: l) [] = refl
-final-sortsl (x :: l) (link c child :: rest-links) = {!!}
-
--}
 
 {-
 list-is-sorted
@@ -768,5 +721,5 @@ Goal: (list-is-sorted
        | [] string<list wordsl [] (link1 :: children))
       ≡ tt
 
--}
 
+-}
