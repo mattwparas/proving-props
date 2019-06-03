@@ -33,52 +33,32 @@ private
   primCharEquality : char → char → 𝔹
 
 
+{-
+
+Define built in <= for characters
+
+char to unicode value, compare numbers
+
+-}
 _<char2_ : char → char → 𝔹
 _<char2_ c1 c2 = (primCharToNat c1) ≤ (primCharToNat c2)
 
 
+{-
+
+Define built in equality for characters
+
+-}
 _=char2_ : char → char → 𝔹
 _=char2_ c1 c2 = (primCharToNat c1) =ℕ (primCharToNat c2)
 
 {-
-postulate
-  ≡char-to-= : (c1 c2 : char) → c1 ≡ c2 → _=char_ c1 c2 ≡ tt
-  =char-to-≡ : (c1 c2 : char) → _=char_ c1 c2 ≡ tt → c1 ≡ c2
--}
 
-{-
-≡char-to-=2 : (c1 c2 : char) → c1 ≡ c2 → _=char2_ c1 c2 ≡ tt
-≡char-to-=2 c1 c2 c1≡c2 = {!!}
--}
+String<= 
 
-
-
-{-
-<char3 : char → char → 𝔹
-<char3 c1 c2 = (primCharToNat c1) ≤ (primCharToNat c2)
--}
-
-{- Function that returns a boolean about whether a string is less than another string,
-- Helper for list-is-sorted
--}
--- TODO check up on the function definitions here
-
-
-{-
-_string<_ : 𝕃 char → 𝕃 char → 𝔹
-_string<_ [] [] = tt
-_string<_ [] (x :: string2) = tt -- "" < "a : pple"
-_string<_ (x :: string1) [] = ff -- "a : pple" < ""
-_string<_ (x :: string1) (y :: string2) with x <char2 y
-... | tt = tt -- "a : (pple)" < "b : (eets)"
-... | ff with x =char y
-... | tt =  string1 string< string2 -- if they are equal, recur on the next char "a : (pple)" = "a : (ble)" -> "p : (ple)" < "b : (le)"
-... | ff = ff -- else case
-
+Extremely poor naming convention, but returns true if the l1 <= l2
 
 -}
-
-
 _string<_ : 𝕃 char → 𝕃 char → 𝔹
 _string<_ [] [] = tt
 _string<_ [] (x :: string2) = tt -- "" < "a : pple"
@@ -87,47 +67,13 @@ _string<_ (x :: string1) (y :: string2) = (x <char2 y) || ((x =char2 y) && (stri
 
 
 
-
-
---(=𝕃 <char3 ('a' :: 'b' :: []) ('a' :: 'b' :: [])) 
-
-{-
-_string<_ : 𝕃 char → 𝕃 char → 𝔹
-_string<_ [] [] = tt
-_string<_ [] (x :: string2) = tt
-_string<_ (x :: string1) [] = ff
-_string<_ (x :: string1) (y :: string2) = (=𝕃 <char3 (x :: string1) (y :: string2))
--}
-
-
+-- # Test Driven Development #
 test-string< : ('a' :: 'b' :: 'c' :: []) string< ('a' :: 'b' :: 'c' :: []) ≡ tt
 test-string< = refl
 
 
 {- Function that returns a boolean about whether a string is less than all the other string in a list
 - Helper for list-is-sorted
--}
--- given string, see if it is less than all other strings in the list
-
-
-{-
-_string<list_ : 𝕃 char → 𝕃 (𝕃 char) → 𝔹
-_string<list_ [] [] = tt
-_string<list_ [] (first-string :: rest-strings) = tt
-_string<list_ (x :: comp-string) [] = tt
-_string<list_ (x :: comp-string) (first-string :: rest-strings) with (x :: comp-string) string< first-string
-... | tt = (x :: comp-string) string<list rest-strings
-... | ff = ff
-
-{- given list of strings, see if the list of strings is in the right order
-              { Note: Useful for external verification? }
--}
-list-is-sorted : 𝕃 (𝕃 char) → 𝔹
-list-is-sorted [] = tt
-list-is-sorted (first-string :: rest-of-words) with first-string string<list rest-of-words
-... | tt = list-is-sorted rest-of-words
-... | ff = ff
-
 -}
 
 _string<list_ : 𝕃 char → 𝕃 (𝕃 char) → 𝔹
@@ -144,6 +90,11 @@ list-is-sorted [] = tt
 list-is-sorted (first-string :: rest-of-words)  = (first-string string<list rest-of-words) && (list-is-sorted rest-of-words)
 
 
+{-
+
+For a given list of characters (string) see if the list of characters are in order
+
+-}
 list-of-chars-sorted : 𝕃 char → 𝔹
 list-of-chars-sorted [] = tt
 list-of-chars-sorted (x :: []) = tt
@@ -155,6 +106,7 @@ list-of-chars-sorted (x :: y :: l) = (x <char2 y) && list-of-chars-sorted (y :: 
 data Trie : 𝕃 char -> Set
 data Link : 𝕃 char -> Set
 
+{- These two data definitions help to define our sorted list of links -}
 data _≤*_ {l} (x : Link l) : 𝕃 (Link l) → Set
 data IsSorted {l} : 𝕃 (Link l) → Set
 
@@ -187,6 +139,7 @@ data IsSorted {l} where
   _s::_ : ∀ {x xs} → x ≤* xs → IsSorted xs → IsSorted (x :: xs)
 
 
+-- #### TESTS #### --
 
 t0 : Trie []
 t0 = node ff [] s[]
@@ -257,13 +210,7 @@ sorted-output : list-is-sorted (wordst [] t3) ≡ tt
 sorted-output = refl
 
 
-
--- if IsSorted, then the rest are also sorted
-{-
-restSorted : ∀ (l : 𝕃 char) (lnk : Link l) (lstlnks : 𝕃 (Link l)) → IsSorted (lnk :: lstlnks) → IsSorted (lstlnks)
-restSorted l lnk lstlnks (x s:: sortlnks) = sortlnks
--}
-
+-- #### END TESTS #### --
 
 
 link-list-to-chars : ∀ {l : 𝕃 char} → Trie l → 𝕃 char
@@ -332,40 +279,6 @@ string-equality2 (x :: l1) (y :: l2) l1=l2 rewrite lemma-char l1 l2 x y l1=l2
                                                    | ||-tt ((primCharToNat x) < (primCharToNat y)) = refl
 
 
--- ||-tt ((primCharToNat x) =ℕ (primCharToNat y)
-
-{-
-string-equality3 : ∀ (l1 l2 : 𝕃 char) → l1 ≡ l2 → l1 string< l2 ≡ tt
-string-equality3 [] [] l1=l2 = refl
-string-equality3 [] (x :: l2) ()
-string-equality3 (x :: l1) [] ()
-string-equality3 (x :: l1) (y :: l2) l1=l2 = {!!}
--}
-
-------- maybe postulate ....
-
-
-
-{-
-
-
-=ℕ-refl : ∀ (x : ℕ) → (x =ℕ x) ≡ tt
-=ℕ-refl 0 = refl
-=ℕ-refl (suc x) = (=ℕ-refl x)
-
-=ℕ-to-≡ : ∀ {x y : ℕ} → x =ℕ y ≡ tt → x ≡ y
-=ℕ-to-≡ {0} {0} u = refl
-=ℕ-to-≡ {suc x} {0} ()
-=ℕ-to-≡ {0} {suc y} ()
-=ℕ-to-≡ {suc x} {suc y} u rewrite =ℕ-to-≡ {x} {y} u = refl
-
-=ℕ-from-≡ : ∀ {x y : ℕ} → x ≡ y → x =ℕ y ≡ tt
-=ℕ-from-≡ {x} refl = =ℕ-refl x
-
-
--}
-
-
 
 char-refl : ∀ (c : char) → (c =char2 c) ≡ tt
 char-refl c = =ℕ-refl (primCharToNat c)
@@ -424,6 +337,8 @@ helper-string<lemma (x :: l) c proof rewrite &&-fst { (x =char2 x) } { =string l
 
 -- <-trans : ∀ {x y z : ℕ} → x < y ≡ tt → y < z ≡ tt → x < z ≡ tt
 
+{-
+
 ||-over-&&-l2 : ∀ {a b c : 𝔹} → a || (b && c) ≡ tt → (a || b) && (a || c) ≡ tt
 ||-over-&&-l2 {a} {b} {c} p rewrite ||-over-&&-l a b c = p
 
@@ -442,10 +357,6 @@ a-||-b-||-b ff ff = refl
 <char||=char c1 c2 = (a-||-b-||-b (primCharToNat c1 < primCharToNat c2) (primCharToNat c1 =ℕ primCharToNat c2))
 
 
-{-
-&&-snd2 : {p1 p2 : 𝔹} → p1 && p2 ≡ tt → p2 ≡ tt
-&&-snd2 {tt} p = p
-&&-snd2 {ff} ()
 -}
 
 
@@ -485,52 +396,6 @@ char<-to-P {a} {b} p rewrite char<-to-back a b = p
   reduction (primCharToNat x < primCharToNat z) (primCharToNat x =ℕ primCharToNat z) (l1 string< l3) =  <char-trans {x} {y} {z} (reductionP { primCharToNat x < primCharToNat y } { primCharToNat x =ℕ primCharToNat y } { l1 string< l2 } l1<l2) (reductionP { primCharToNat y < primCharToNat z } { primCharToNat y =ℕ primCharToNat z } { l2 string< l3 } l2<l3)
 
 
--- ≤-trans (reductionP l1<l2) (reductionP l2<l3)
-
-{-
-
-<string-trans : ∀ (l1 l2 l3 : 𝕃 char) → l1 string< l2 ≡ tt → l2 string< l3 ≡ tt → l1 string< l3 ≡ tt
-<string-trans [] [] [] l1<l2 l2<l3 = refl
-<string-trans [] [] (x :: l3) l1<l2 l2<l3 = refl
-<string-trans [] (x :: l2) [] l1<l2 l2<l3 = refl
-<string-trans [] (x :: l2) (x₁ :: l3) l1<l2 l2<l3 = refl
-<string-trans (x :: l1) [] [] ()
-<string-trans (x :: l1) [] (x₁ :: l3) ()
-<string-trans (x :: l1) (x₁ :: l2) [] l1<l2 ()
-<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 rewrite
-  ||-over-&&-l (x <char2 z) (x =char2 z) (l1 string< l3)
-  | (a-||-b-||-b (primCharToNat x < primCharToNat z) (primCharToNat x =ℕ primCharToNat z)) {-
-  | &&-fst (||-over-b (||-over-&&-l2 (<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3))) -} = {! ||-over-&&-l2 (<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3)!}
--}
-
-{-
-
-&&-fst : {p1 p2 : 𝔹} → p1 && p2 ≡ tt → p1 ≡ tt
-&&-fst{tt} p = refl
-&&-fst{ff} ()
-
--}
-
-{-
-
-||-over-&&-l2 (<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3)
-
-((primCharToNat x < primCharToNat z ||
-        primCharToNat x =ℕ primCharToNat z)
-       || primCharToNat x =ℕ primCharToNat z)
-      &&
-      ((primCharToNat x < primCharToNat z ||
-        primCharToNat x =ℕ primCharToNat z)
-       || (l1 string< l3))
-      ≡ tt
-
--}
-
-
-
--- <char-trans (||-over-b (&&-snd (||-over-&&-l2 l1<l2)))
-
--- rewrite ||-over-&&-l (x <char2 z) (x =char2 z) (l1 string< l3) 
 
 string<string+c2 : ∀ (l1 : 𝕃 char) (c : char) → l1 string< (l1 ++ c :: []) ≡ tt
 string<string+c2 [] c = refl
@@ -545,39 +410,6 @@ string<string+c (x :: l1) (firstchar :: l2) c proof = <string-trans (x :: l1) (x
 
 
 
-
--- <string-trans (x :: l1) (x :: l1 ++ c :: []) (firstchar :: l1) (string<string+c2 (x :: l1) c) proof
-
-{-
-
-
-Goal: ((x :: l1) string< (firstchar :: l2)) ≡ tt
-
-
-proof     : (((x :: l1) ++ c :: []) string< (firstchar :: l2)) ≡ tt
-
-
-Also have : (x :: l1) string< (x :: l1 ++ c :: [])
-
-
-
--}
-
-
--- &&-snd {x <char2 firstchar || x =char2 firstchar} {l1 string< l2} (string<string+c (x :: l1) (firstchar :: l2) c proof)
-
-{-
-
-proof     : (x <char2 firstchar) ||
-            (x =char2 firstchar) && ((l1 ++ c :: []) string< l2)
-            ≡ tt
-
--}
--- rewrite ||-over-&&-l (x <char2 firstchar) (x =char2 firstchar) (l1 string< l2)
-
--- &&-fst {(x <char2 firstchar) || (x =char firstchar)} {l1 string< l2} proof
-
-
 string<list+c : ∀ (l : 𝕃 char) (c : char) (lst : 𝕃 (𝕃 char)) → (l ++ c :: []) string<list lst ≡ tt → l string<list lst ≡ tt
 string<list+c [] c [] proof = refl
 string<list+c [] c (lst :: lst₁) proof = refl
@@ -585,26 +417,10 @@ string<list+c (x :: l) c [] proof = refl
 string<list+c (x :: l) c (first :: rest) proof rewrite string<string+c (x :: l) (first) c (&&-fst proof) = string<list+c (x :: l) c rest (&&-snd proof)
 
 
-{-
-≡-to-=string : (s1 s2 : 𝕃 char) → s1 ≡ s2 → =string s1 s2 ≡ tt
-≡-to-=string [] [] s1=s2 = refl
-≡-to-=string [] (x :: s2) ()
-≡-to-=string (x :: s1) [] ()
-≡-to-=string (x :: s1) (y :: s2) s1=s2 = {!!}
--}
-
-
 output-wordst : ∀ (l : 𝕃 char) (t : Trie l) → l string<list (wordst l t) ≡ tt
 
 output-wordsl : ∀ (l : 𝕃 char) (lst : 𝕃 (Link l)) → (sortProof : IsSorted lst) → l string<list (wordsl l lst sortProof) ≡ tt
 
-
-{-
-output-wordst+c : ∀ (l : 𝕃 char) (c : char) (t : Trie (l ++ c :: [])) → l string<list (wordst (l ++ c :: []) t) ≡ tt
-output-wordst+c l c t = {!!}
--}
-
--- output-combined : ∀ (l : 𝕃 char) (c : char) (t : Trie (l ++ c :: []) 
 
 
 output-wordst [] (node wordp children is-sorted) = empty-string-< (wordst [] (node wordp children is-sorted))
@@ -620,93 +436,7 @@ output-wordsl (x :: l) [] s[] = refl
 output-wordsl (x :: l) (link c child :: rest-link) (curr s:: sortproof) = string<list-comm (x :: l) (wordst (x :: l ++ c :: []) child) (wordsl (x :: l) rest-link sortproof) ((string<list+c (x :: l) c (wordst (x :: l ++ c :: []) child) (output-wordst (x :: l ++ c :: []) child))) (output-wordsl (x :: l) rest-link sortproof)
 
 
-{-
 
-Goal: ((x :: l) string<list
-       (wordst (x :: l ++ c :: []) child ++
-        wordsl (x :: l) rest-link sortproof))
-      ≡ tt
-
-
-provide proof that: 
-
-p1 : (x :: l) string<list (wordst (x :: l ++ c :: []) child)
-
-
-
-
-p1 : (string<list+c (x :: l) c (wordst (x :: l ++ c :: []) child) (output-wordst (x :: l ++ c :: []) child))
-
-say that l < 
-
-p2 : output-wordsl (x :: l) rest-link sortproof
-
-combine them as such:
-
-
-string<list-comm (x :: l) (wordst (x :: l ++ c :: []) child) (wordst (x :: l) rest-link sortproof) p1 p2
-
-
-
-
-
-
-
--}
-
-
-
--- empty-string-< (wordsl [] (x :: lst) {!!})
-
-
-
--- need lemmas about the behavior of wordst in given conditions
--- need lemmas about the behavior of wordsl in given conditions
-
-
-{-
-
-{- to compute all of the words in `t` -}
-wordst : ∀ l -> (t : Trie l) -> 𝕃 (𝕃 char)
-
-{- to compute all of the words in `lst`, which are the children of some Trie -}
-wordsl : ∀ l -> (lst : 𝕃 (Link l)) -> IsSorted lst → 𝕃 (𝕃 char)
-
-
-wordst l (node tt children proof) = l :: (wordsl l children proof)
-wordst l (node ff children proof) = wordsl l children proof
-wordsl l [] s[] = []
-wordsl l (link c child :: lt) (x s:: proof) = (wordst (l ++ (c :: [])) child) ++ (wordsl l lt proof)
-
--}
-
-{-
-append-[]= : ∀ (l : 𝕃 char) → l ≡ (l ++ [])
-append-[]= [] = refl
-append-[]= (x :: l) = {!refl!}
--}
-
-
-
-
--- &&-snd {(x :: l) string< firstString} {(x :: l) string<list lchars2} l<l1 --- first argument
--- string<firstword-list (x :: l) secondString lchars4 l<l2 --- second argument
-
-
-
--- wordst l (node tt children proof) = l :: wordsl l children ------> from the defining equations this should work
-
--- something like this...
-
-{-
-equate-wordst-wordsl : ∀ (l : 𝕃 char) → (t : Trie l) → (lnk : 𝕃 (Link l)) → (sortProof : (IsSorted lnk)) → wordst l t ≡ l :: wordsl l lnk sortProof
-equate-wordst-wordsl = {!!}
-
-
-
-children-are-next-level : ∀ (l : 𝕃 char) → (t : Trie l) → {- wordst l t -} 𝔹
-children-are-next-level = {!!}
--}
 
 
 wordst-is-sorted : ∀ (l : 𝕃 char) (t : Trie l) → list-is-sorted (wordst l t) ≡ tt
