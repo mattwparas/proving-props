@@ -13,22 +13,24 @@
   [create-children (-> (non-empty-listof char?) (listof trie?) (listof char?) (listof trie?))]
   [handle-last-letter (-> (listof char?) (listof trie?) (listof char?) (listof trie?))]
   [handle-intern-letter (-> (listof char?) (listof trie?) (listof char?) (listof trie?))]
-  [insert (-> trie? string? trie?)]
+[insert (->i ([x trie?] 
+              [y string?])
+             [res (and/c trie? (lambda (res) all-children-in-order res))])]
   [trie<? (-> trie? trie? boolean?)]
   [pre-order-traverse (-> trie? void)]
-  [build-trie-from-list-of-words (->i ([x trie?] 
-                                       [y (and/c (listof string?) (lambda (y)
-                                                                    (only-unique-words y)))])
-                                      [res (y) (and/c trie? (and/c (lambda (res) all-children-in-order res)
-                                                                   (and/c
-                                                                    (lambda (res) (num-of-char-nodes<=num-of-chars res y))
-                                                                    (lambda (res) (num-of-words=num-of-true res y))
-                                                                    )))])]
+[build-trie-from-list-of-words
+ (->i ([x trie?]
+       [y (and/c (listof string?) (lambda (y)
+                                    (only-unique-words y)))])
+      [res (y) (and/c trie? (and/c (lambda (res) all-children-in-order res)
+                                   (and/c
+                                    (lambda (res) (num-of-char-nodes<=num-of-chars res y))
+                                    (lambda (res) (num-of-words=num-of-true res y)))))])]
   [trie-sort (->i ([y (listof string?)])
-                  [res (y) (and/c (lambda (res) (string-list-sorted? res))
+                  [res (y) (and/c (lambda (res) (ordered-strings? res))
                                   (and/c (lambda (res) (permutation? y res))
                                          (listof string?)))])]
-  [pre-order-helper (-> trie? (listof integer?))]
+  [pre-order (-> trie? (listof integer?))]
   ))
 
 ;; ------------------------- TRIE ---------------------------- ;;
@@ -92,9 +94,7 @@
          (cons (trie char (create-children 
                            (rest char-list) empty next-prefix) #f next-prefix) lst)]
         [(char=? char (trie-char (first lst))) ;; equal, step down
-         (cons (trie char (create-children
-                           (rest char-list)
-                           (trie-children (first lst)) next-prefix)
+         (cons (trie char (create-children (rest char-list) (trie-children (first lst)) next-prefix)
                      (trie-end-word? (first lst))
                      (trie-word-up-to (first lst)))
                (rest lst))]
@@ -135,29 +135,29 @@
 
 (define (trie-sort list-of-words)
   (define new-trie (build-trie-from-list-of-words empty-trie list-of-words))
-  (pre-order-helper new-trie))
+  (pre-order new-trie))
 
 ; THIS ONE WORKS (using con and flatten)
 ;; contract: trie? -> (listof string?)
-;;; (define (pre-order-helper trie-node)
-;;;   (if (trie-end-word? trie-node)
-;;;     (cons (list->string (trie-word-up-to trie-node))
-;;;       (flatten (map pre-order-helper (trie-children trie-node))))
-;;;     (flatten (map pre-order-helper (trie-children trie-node)))))
+(define (pre-order trie-node)
+  (if (trie-end-word? trie-node)
+    (cons (list->string (trie-word-up-to trie-node))
+      (flatten (map pre-order (trie-children trie-node))))
+    (flatten (map pre-order (trie-children trie-node)))))
 
 ;; THIS ALSO WORKS (using foldr and map)
 ;; contract: trie? -> (listof string?)
-(define (pre-order-helper trie-node)
-  (if (trie-end-word? trie-node)
-      (foldr append (list (list->string (trie-word-up-to trie-node)))
-             (map pre-order-helper (trie-children trie-node)))
-      (foldr append empty (map pre-order-helper (trie-children trie-node)))))
+;;; (define (pre-order trie-node)
+;;;   (if (trie-end-word? trie-node)
+;;;       (foldr append (list (list->string (trie-word-up-to trie-node)))
+;;;              (map pre-order (trie-children trie-node)))
+;;;       (foldr append empty (map pre-order (trie-children trie-node)))))
 
 ;; a little print test
 (define test-list (list "apple" "app" "ape" "nest"))
 (define trie1 (build-trie-from-list-of-words empty-trie test-list))
 ; (pre-order-traverse trie1)
-; (displayln (pre-order-helper trie1))
+; (displayln (pre-order trie1))
 
 ;; --------------------------- PROPERTY FUNCTIONS ------------------------------ ;;
 
@@ -208,6 +208,14 @@
         [(= (length lst) 1) #t]
         [(char<? (first lst) (first (rest lst)))
          (ordered? (rest lst))]
+        [else #f]))
+
+;; contract: (listof string?) -> boolean?
+(define (ordered-strings? lst)
+  (cond [(empty? lst) #t]
+        [(= (length lst) 1) #t]
+        [(string<? (first lst) (first (rest lst)))
+          (ordered-strings? (rest lst))]
         [else #f]))
 
 (define (string-list-sorted? lst)
