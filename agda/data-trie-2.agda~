@@ -1,0 +1,53 @@
+{- 
+
+Proving the correctness of sorting using a trie data structure in ~agda~
+
+Starring:
+
+  Alexandra Grimes 
+      
+        and 
+    
+   Matthew Paras
+
+Date : 5/24/19
+
+-}
+
+open import char
+open import maybe
+open import string
+open import unit
+open import level
+open import eq
+open import nat
+open import nat-thms
+open import bool
+open import bool-thms
+open import product
+open import product-thms
+open import neq
+open import empty
+open import list
+open import list-thms
+
+
+data Trie : 𝕃 char -> Set
+data Link : 𝕃 char -> Set
+
+data Trie where
+node : ∀ {l : 𝕃 char} ->
+       bool ->  {- determines if this a word -}
+       𝕃 (Link l) ->
+       Trie l
+
+data Link where
+link : ∀ (c : char) { l : 𝕃 char } ->
+       Trie (c :: l) ->
+       Link l
+
+t1 : Trie []
+t1 = node  ff
+ (link 'a' (node tt []) ::
+ (link 'o' (node ff (link 'n' (node  tt []) :: []))) ::
+ [])
