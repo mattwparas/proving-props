@@ -15,14 +15,14 @@
   [handle-intern-letter (-> (listof char?) (listof trie?) (listof char?) (listof trie?))]
 [insert (->i ([x trie?] 
               [y string?])
-             [res (and/c trie? (lambda (res) all-children-in-order res))])]
+             [res (and/c trie? (lambda (res) (all-children-in-order res)))])]
   [trie<? (-> trie? trie? boolean?)]
   [pre-order-traverse (-> trie? void)]
 [build-trie-from-list-of-words
  (->i ([x trie?]
        [y (and/c (listof string?) (lambda (y)
                                     (only-unique-words y)))])
-      [res (y) (and/c trie? (and/c (lambda (res) all-children-in-order res)
+      [res (y) (and/c trie? (and/c (lambda (res) (all-children-in-order res))
                                    (and/c
                                     (lambda (res) (num-of-char-nodes<=num-of-chars res y))
                                     (lambda (res) (num-of-words=num-of-true res y)))))])]
@@ -225,7 +225,7 @@
 (define (child-in-order trie-node)
   (define children-chars 
     (map (lambda (child-node) 
-           (trie-char child-node))))
+           (trie-char child-node)) (trie-children trie-node)))
   (ordered? children-chars))
 
 ;; contract: trie? -> boolean?
