@@ -300,6 +300,9 @@ helper-string≤lemma (x :: l) c proof rewrite &&-fst { (x =char2 x) } { =string
 <char=-trans {c1} {c2} {c3} p1 p2 rewrite char-refl c2 | =ℕ-to-≡ {primCharToNat c2} {primCharToNat c3} p2 = p1
 
 
+-- this is just a goddamn mess honestly
+-- idk why its so difficult
+
 <string-trans : ∀ (l1 l2 l3 : 𝕃 char) → l1 string≤ l2 ≡ tt → l2 string≤ l3 ≡ tt → l1 string≤ l3 ≡ tt
 <string-trans [] [] [] l1<l2 l2<l3 = refl
 <string-trans [] [] (x :: l3) l1<l2 l2<l3 = refl
@@ -428,6 +431,9 @@ wordst+c<wordsl l c t linkc lnks firstSorted proofSorted = {!!}
 
 ------------------------------------------------------------------------------------------
 
+
+
+{- this isn't needed I think
 string≤list-fst : ∀ {w1 w2 : 𝕃 char} {lst : 𝕃 (𝕃 char)} → w1 string≤list (w2 :: lst) ≡ tt → w1 string≤ w2 ≡ tt
 string≤list-fst {[]} {[]} {lst} p = refl
 string≤list-fst {[]} {x :: w2} {lst} p = refl
@@ -436,16 +442,21 @@ string≤list-fst {x :: w1} {y :: w2} {[]} p rewrite  (&&-tt (x =char2 y && w1 s
 string≤list-fst {x :: w1} {y :: w2} {lst :: rest} p rewrite (&&-fst {x <char3 y || (x =char2 y) && (w1 string≤ w2)} {((x :: w1) string≤ lst) && ((x :: w1) string≤list rest)} p) = refl
 
 
---maybe
+-- this is also not needed I think
 firstlistwords≤ : ∀ {l1 l2 : 𝕃 (𝕃 char)} {w1 w2 : 𝕃 char} → (w1 :: l1) listwords≤listwords (w2 :: l2) ≡ tt → w1 string≤ w2 ≡ tt
-firstlistwords≤ {l1} {l2} {w1} {w2} p1 = string≤list-fst {w1} {w2} {l2} (&&-fst {w1 string≤list (w2 :: l2)} {l1 listwords≤listwords (w2 :: l2)} p1) 
+firstlistwords≤ {l1} {l2} {w1} {w2} p1 = string≤list-fst {w1} {w2} {l2} (&&-fst {w1 string≤list (w2 :: l2)} {l1 listwords≤listwords (w2 :: l2)} p1)
+-}
+
+
 
 
 lstring1<lstring2-sort : ∀ {l1 l2 : 𝕃 (𝕃 char)} → l1 listwords≤listwords l2 ≡ tt → list-is-sorted l1 ≡ tt → list-is-sorted l2 ≡ tt → list-is-sorted (l1 ++ l2) ≡ tt
 lstring1<lstring2-sort {[]} {[]} l1<l2 l1sort l2sort = refl
 lstring1<lstring2-sort {[]} {l2 :: l3} l1<l2 l1sort l2sort = l2sort
 lstring1<lstring2-sort {l1 :: l2} {[]} l1<l2 l1sort l2sort rewrite ++[] l2 = l1sort
-lstring1<lstring2-sort {f1 :: l1} {f2 :: l2} l1<l2 l1sort l2sort = {!!}
+lstring1<lstring2-sort {f1 :: l1} {f2 :: l2} l1<l2 l1sort l2sort rewrite
+  string≤list-comm f1 l1 (f2 :: l2) (&&-fst {f1 string≤list l1} {list-is-sorted l1} l1sort) (&&-fst {f1 string≤list (f2 :: l2)} {(l1 listwords≤listwords (f2 :: l2))} l1<l2)
+  | lstring1<lstring2-sort {l1} {(f2 :: l2)} (&&-snd {f1 string≤list (f2 :: l2)} {l1 listwords≤listwords (f2 :: l2)} l1<l2) (&&-snd {f1 string≤list l1} {list-is-sorted l1} l1sort) l2sort = refl
 
 
 
