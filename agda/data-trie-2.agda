@@ -428,7 +428,7 @@ wordst+c<wordsl : ∀ (l : 𝕃 char)
                     (proofSorted : IsSorted lnks)
                     → (wordst (l ++ c :: []) t) listwords≤listwords (wordsl l lnks proofSorted) ≡ tt
                     
-wordst+c<wordsl l c t linkc lnks firstSorted proofSorted = {!!}
+wordst+c<wordsl l c t linkc lnks firstSorted proofSorted = {!l t linkc lnks firstSorted proofSorted!}
 
 
 
