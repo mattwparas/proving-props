@@ -31,6 +31,7 @@ private
  primitive
   primCharToNat    : char → ℕ
   primCharEquality : char → char → 𝔹
+  primNatToChar    : ℕ → char
 
 ----------------------------------------------------------------------
 -- character definitions
@@ -70,6 +71,29 @@ list-of-chars-sorted (x :: y :: l) = (x <char3 y) && list-of-chars-sorted (y :: 
 char-refl : ∀ (c : char) → (c =char2 c) ≡ tt
 char-refl c = =ℕ-refl (primCharToNat c)
 
+
+{-
+postulate
+  2cast : ∀ (c : char) → primNatToChar (primCharToNat c) ≡ c
+
+
+natChar= : ∀ (x y : ℕ) → x ≡ y → primNatToChar x ≡ primNatToChar y
+natChar= x y p rewrite p = refl
+-}
+
+
+{-
+
+char-same : ∀ (x y : char) → (x =char2 y) ≡ tt → x ≡ y
+char-same x y p = {!!}
+
+-}
+
+
+
+
+
+-- nat-to-char x y (=ℕ-to-≡ {primCharToNat x} {primCharToNat y} p)
 
 ----------------------------------------------------------------------
 -- string definitions
@@ -176,9 +200,9 @@ data IsSorted {l} where
 ----------------------------------------------------------------------
 
 insert : 𝕃 char → (t : Trie []) -> Trie []
-insert [] = {!!}
-insert (x :: []) = {!!}
-insert (x :: l) = {!!}
+insert [] t = t
+insert (x :: []) t = {!!}
+insert (x :: y :: l) t = {!!}
 
 
 ----------------------------------------------------------------------
@@ -272,6 +296,9 @@ helper-string≤lemma (x :: l) c proof rewrite &&-fst { (x =char2 x) } { =string
 <char-trans : ∀ {c1 c2 c3 : char} → c1 <char3 c2 ≡ tt → c2 <char3 c3 ≡ tt → c1 <char3 c3 ≡ tt
 <char-trans {c1} {c2} {c3} p1 p2 = <-trans {primCharToNat c1} {primCharToNat c2} {primCharToNat c3} p1 p2
 
+<char=-trans : ∀ {c1 c2 c3 : char} → c1 <char3 c2 ≡ tt → c2 =char2 c3 ≡ tt → c1 <char3 c3 ≡ tt
+<char=-trans {c1} {c2} {c3} p1 p2 rewrite char-refl c2 | =ℕ-to-≡ {primCharToNat c2} {primCharToNat c3} p2 = p1
+
 
 <string-trans : ∀ (l1 l2 l3 : 𝕃 char) → l1 string≤ l2 ≡ tt → l2 string≤ l3 ≡ tt → l1 string≤ l3 ≡ tt
 <string-trans [] [] [] l1<l2 l2<l3 = refl
@@ -281,7 +308,60 @@ helper-string≤lemma (x :: l) c proof rewrite &&-fst { (x =char2 x) } { =string
 <string-trans (x :: l1) [] [] ()
 <string-trans (x :: l1) [] (x₁ :: l3) ()
 <string-trans (x :: l1) (x₁ :: l2) [] l1<l2 ()
-<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 = {!!}
+<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 with (x =char2 z) && (l1 string≤ l3)
+<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | tt rewrite ||-tt (primCharToNat x < primCharToNat z) = refl
+<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | ff with keep (x <char3 y) | keep ((x =char2 y) && (l1 string≤ l2)) | keep (y <char3 z) | keep ((y =char2 z) && (l2 string≤ l3))
+<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | ff | tt , p1 | tt , p2 | tt , p3 | _ , p4 rewrite <char-trans {x} {y} {z} p1 p3 = refl
+<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | ff | tt , p1 | ff , p2 | tt , p3 | tt , p4 = {!!}
+<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | ff | tt , p1 | tt , p2 | ff , p3 | tt , p4 rewrite p1 | p2 | p3 | p4 | <char=-trans {x} {y} {z} p1 (&&-fst {primCharToNat y =ℕ primCharToNat z} {l2 string≤ l3} p4) = refl
+-- <string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | ff | tt , p1 | tt , p2 | tt , p3 | ff , p4 = {!!}
+<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | ff | tt , p1 | ff , p2 | ff , p3 | tt , p4 = {!!}
+<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | ff | tt , p1 | tt , p2 | ff , p3 | ff , p4 = {!!}
+<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | ff | tt , p1 | ff , p2 | tt , p3 | ff , p4 = {!!}
+<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | ff | tt , p1 | ff , p2 | ff , p3 | ff , p4 = {!!}
+<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | ff | ff , p1 | tt , p2 | tt , p3 | tt , p4 = {!!}
+<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | ff | ff , p1 | ff , p2 | tt , p3 | tt , p4 = {!!}
+<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | ff | ff , p1 | tt , p2 | ff , p3 | tt , p4 = {!!}
+<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | ff | ff , p1 | tt , p2 | tt , p3 | ff , p4 = {!!}
+<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | ff | ff , p1 | ff , p2 | ff , p3 | tt , p4 = {!!}
+<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | ff | ff , p1 | tt , p2 | ff , p3 | ff , p4 = {!!}
+<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | ff | ff , p1 | ff , p2 | tt , p3 | ff , p4 = {!!}
+<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | ff | ff , p1 | ff , p2 | ff , p3 | ff , p4 rewrite p1 | p2 | p3 | p4 = {!!}
+
+{-
+
+<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | ff | tt , p1 | tt , p2 | tt , p3 | _ , p4 rewrite <char-trans {x} {y} {z} p1 p3 = refl
+<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | ff | tt , p1 | tt , p2 | ff , p3 | tt , p4 rewrite p1 | p2 | p3 | p4 | <char=-trans {x} {y} {z} p1 (&&-fst {primCharToNat y =ℕ primCharToNat z} {l2 string≤ l3} p4) = refl
+<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | ff | tt , p1 | tt , p2 | ff , p3 | ff , p4 rewrite p1 | p2 | p3 | p4 = {!!}
+<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | ff | tt , p1 | ff , p2 | tt , p3 | _ , p4 = {!!}
+<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | ff | ff , p1 | tt , p2 | = {!!}
+<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | ff | ff , p1 | ff , p2 | = {!!}
+
+-}
+
+
+
+{-
+<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 with (x <char3 y) | ((x =char2 y) && (l1 string≤ l2))
+<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | tt | tt = {!!}
+<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | tt | ff = {!!}
+<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | ff | tt = {!!}
+<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | ff | ff = {!!}
+-}
+
+{- with (x =char2 z) && (l1 string≤ l3)
+... | tt rewrite ||-tt (primCharToNat x < primCharToNat z) = refl
+... | ff with keep (x <char3 y) | keep (y <char3 z)
+... | tt , x<y | tt , y<z rewrite <char-trans {x} {y} {z} x<y y<z = refl
+... | tt , x<y | ff , y>z = {!!}
+... | ff , x>y | tt , y<z = {!!}
+... | ff , x>y | ff , y>z = {!!} -- bogus case????
+-}
+
+
+
+
+-- (<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3)
 
 
 string≤string+c2 : ∀ (l1 : 𝕃 char) (c : char) → l1 string≤ (l1 ++ c :: []) ≡ tt
@@ -345,12 +425,31 @@ wordst+c<wordsl : ∀ (l : 𝕃 char)
 wordst+c<wordsl l c t linkc lnks firstSorted proofSorted = {!!}
 
 
+
+------------------------------------------------------------------------------------------
+
+string≤list-fst : ∀ {w1 w2 : 𝕃 char} {lst : 𝕃 (𝕃 char)} → w1 string≤list (w2 :: lst) ≡ tt → w1 string≤ w2 ≡ tt
+string≤list-fst {[]} {[]} {lst} p = refl
+string≤list-fst {[]} {x :: w2} {lst} p = refl
+string≤list-fst {x :: w1} {[]} {lst} ()
+string≤list-fst {x :: w1} {y :: w2} {[]} p rewrite  (&&-tt (x =char2 y && w1 string≤ w2)) | &&-tt ((primCharToNat x < primCharToNat y || primCharToNat x =ℕ primCharToNat y && (w1 string≤ w2))) = p
+string≤list-fst {x :: w1} {y :: w2} {lst :: rest} p rewrite (&&-fst {x <char3 y || (x =char2 y) && (w1 string≤ w2)} {((x :: w1) string≤ lst) && ((x :: w1) string≤list rest)} p) = refl
+
+
+--maybe
+firstlistwords≤ : ∀ {l1 l2 : 𝕃 (𝕃 char)} {w1 w2 : 𝕃 char} → (w1 :: l1) listwords≤listwords (w2 :: l2) ≡ tt → w1 string≤ w2 ≡ tt
+firstlistwords≤ {l1} {l2} {w1} {w2} p1 = string≤list-fst {w1} {w2} {l2} (&&-fst {w1 string≤list (w2 :: l2)} {l1 listwords≤listwords (w2 :: l2)} p1) 
+
+
 lstring1<lstring2-sort : ∀ {l1 l2 : 𝕃 (𝕃 char)} → l1 listwords≤listwords l2 ≡ tt → list-is-sorted l1 ≡ tt → list-is-sorted l2 ≡ tt → list-is-sorted (l1 ++ l2) ≡ tt
 lstring1<lstring2-sort {[]} {[]} l1<l2 l1sort l2sort = refl
 lstring1<lstring2-sort {[]} {l2 :: l3} l1<l2 l1sort l2sort = l2sort
 lstring1<lstring2-sort {l1 :: l2} {[]} l1<l2 l1sort l2sort rewrite ++[] l2 = l1sort
 lstring1<lstring2-sort {f1 :: l1} {f2 :: l2} l1<l2 l1sort l2sort = {!!}
 
+
+
+-----------------------------------------------------------------------------------------
 
 wordst-is-sorted : ∀ (l : 𝕃 char) (t : Trie l) → list-is-sorted (wordst l t) ≡ tt
 
