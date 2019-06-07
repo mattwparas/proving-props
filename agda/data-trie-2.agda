@@ -418,7 +418,7 @@ output-wordsl (x :: l) (link c child :: rest-link) (curr s:: sortproof) = string
 
 -- probably need to combine like output-wordst and output-wordsl in some creative way, maybe need a lemma maybe not idk shits whack
 -- also be careful about splitting here things will blow up real quick
-
+-- ########################################################################## import business here ###################################### -----
 wordst+c<wordsl : ∀ (l : 𝕃 char)
                     (c : char)
                     (t : Trie (l ++ c :: []))
@@ -433,23 +433,6 @@ wordst+c<wordsl l c t linkc lnks firstSorted proofSorted = {!!}
 
 
 ------------------------------------------------------------------------------------------
-
-
-
-{- this isn't needed I think
-string≤list-fst : ∀ {w1 w2 : 𝕃 char} {lst : 𝕃 (𝕃 char)} → w1 string≤list (w2 :: lst) ≡ tt → w1 string≤ w2 ≡ tt
-string≤list-fst {[]} {[]} {lst} p = refl
-string≤list-fst {[]} {x :: w2} {lst} p = refl
-string≤list-fst {x :: w1} {[]} {lst} ()
-string≤list-fst {x :: w1} {y :: w2} {[]} p rewrite  (&&-tt (x =char2 y && w1 string≤ w2)) | &&-tt ((primCharToNat x < primCharToNat y || primCharToNat x =ℕ primCharToNat y && (w1 string≤ w2))) = p
-string≤list-fst {x :: w1} {y :: w2} {lst :: rest} p rewrite (&&-fst {x <char3 y || (x =char2 y) && (w1 string≤ w2)} {((x :: w1) string≤ lst) && ((x :: w1) string≤list rest)} p) = refl
-
-
--- this is also not needed I think
-firstlistwords≤ : ∀ {l1 l2 : 𝕃 (𝕃 char)} {w1 w2 : 𝕃 char} → (w1 :: l1) listwords≤listwords (w2 :: l2) ≡ tt → w1 string≤ w2 ≡ tt
-firstlistwords≤ {l1} {l2} {w1} {w2} p1 = string≤list-fst {w1} {w2} {l2} (&&-fst {w1 string≤list (w2 :: l2)} {l1 listwords≤listwords (w2 :: l2)} p1)
--}
-
 
 
 
@@ -664,6 +647,21 @@ decomp x y z l1 l2 l3 p1 p2 = {!!}
 string≤string+c2 : ∀ (l1 : 𝕃 char) (c : char) → l1 string≤ (l1 ++ c :: []) ≡ tt
 string≤string+c2 [] c = refl
 string≤string+c2 (x :: l) c rewrite char-refl x | ||-tt (primCharToNat x < primCharToNat x) = {!!}
+-}
+
+
+{- this isn't needed I think
+string≤list-fst : ∀ {w1 w2 : 𝕃 char} {lst : 𝕃 (𝕃 char)} → w1 string≤list (w2 :: lst) ≡ tt → w1 string≤ w2 ≡ tt
+string≤list-fst {[]} {[]} {lst} p = refl
+string≤list-fst {[]} {x :: w2} {lst} p = refl
+string≤list-fst {x :: w1} {[]} {lst} ()
+string≤list-fst {x :: w1} {y :: w2} {[]} p rewrite  (&&-tt (x =char2 y && w1 string≤ w2)) | &&-tt ((primCharToNat x < primCharToNat y || primCharToNat x =ℕ primCharToNat y && (w1 string≤ w2))) = p
+string≤list-fst {x :: w1} {y :: w2} {lst :: rest} p rewrite (&&-fst {x <char3 y || (x =char2 y) && (w1 string≤ w2)} {((x :: w1) string≤ lst) && ((x :: w1) string≤list rest)} p) = refl
+
+
+-- this is also not needed I think
+firstlistwords≤ : ∀ {l1 l2 : 𝕃 (𝕃 char)} {w1 w2 : 𝕃 char} → (w1 :: l1) listwords≤listwords (w2 :: l2) ≡ tt → w1 string≤ w2 ≡ tt
+firstlistwords≤ {l1} {l2} {w1} {w2} p1 = string≤list-fst {w1} {w2} {l2} (&&-fst {w1 string≤list (w2 :: l2)} {l1 listwords≤listwords (w2 :: l2)} p1)
 -}
 
 
