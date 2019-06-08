@@ -72,22 +72,7 @@ char-refl : ∀ (c : char) → (c =char2 c) ≡ tt
 char-refl c = =ℕ-refl (primCharToNat c)
 
 
-{-
-postulate
-  2cast : ∀ (c : char) → primNatToChar (primCharToNat c) ≡ c
 
-
-natChar= : ∀ (x y : ℕ) → x ≡ y → primNatToChar x ≡ primNatToChar y
-natChar= x y p rewrite p = refl
--}
-
-
-{-
-
-char-same : ∀ (x y : char) → (x =char2 y) ≡ tt → x ≡ y
-char-same x y p = {!!}
-
--}
 
 
 
@@ -468,14 +453,65 @@ anything-goes[] (l :: l₁) = refl
 -- also be careful about splitting here things will blow up real quick
 -- ########################################################################## import business here ###################################### -----
 
+
+
+-- construct-instance : ∀ (l : 𝕃 char)
+
+
+
+postulate
+  char-same : ∀ (x y : char) → primCharToNat x ≡ primCharToNat y → x ≡ y
+
+
+=char2-to-≡ : ∀ {c1 c2 : char} → c1 =char2 c2 ≡ tt → c1 ≡ c2
+=char2-to-≡ {c1} {c2} p = char-same c1 c2 (=ℕ-to-≡ {primCharToNat c1} {primCharToNat c2} p)
+
+
+
+get-c : ∀ (l : 𝕃 char)
+           -- → (t : Trie (l ++ c :: []))
+           → (linkc : Link l)
+           → char
+get-c l (link c child) = c
+
+
+get-t : ∀ (l : 𝕃 char)
+           → (linkc : Link l)
+           → (c : char)
+           → (get-c l linkc) ≡ c
+           → Trie (l ++ c :: [])
+get-t l (link c2 child) c p rewrite sym p = child
+
+-- rewrite sym (=char2-to-≡ {c2} {c} p) = child
+
+
+
+wordst+c<wordsl : ∀ (l : 𝕃 char)
+       → (c : char)
+       → (t : Trie (l ++ c :: []))
+       → (linkc : Link l)
+       → (lnks : 𝕃 (Link (l)))
+       → (firstSorted : linkc ≤* lnks)
+       → (proofSorted : IsSorted lnks)
+       → (char-p : (get-c l linkc) ≡ c)
+       → (return-p : (get-t l linkc c char-p) ≡ t)
+       → (wordst (l ++ c :: []) t) listwords≤listwords (wordsl l lnks proofSorted) ≡ tt
+wordst+c<wordsl [] c (node wordp children x) (link c1 child) [] <[] s[] char-p return-p
+  rewrite anything-goes[] (wordst (c :: []) (node wordp children x)) = refl
+wordst+c<wordsl [] c (node tt children x₁) (link .c .(node tt children x₁)) (x :: lnks) (x₂ <:: firstSorted) (x₃ s:: proofSorted) refl refl = {!!}
+wordst+c<wordsl [] c (node ff children x₁) (link .c .(node ff children x₁)) (x :: lnks) (x₂ <:: firstSorted) (x₃ s:: proofSorted) refl refl = {!!}
+wordst+c<wordsl (x :: l) c (node wordp children x₁) (link .c .(node wordp children x₁)) [] <[] s[] refl refl
+  rewrite anything-goes[] (wordst (x :: l ++ c :: []) (node wordp children x₁)) = refl
+wordst+c<wordsl (x :: l) c (node wordp children x₂) (link .c .(node wordp children x₂)) (x₁ :: lnks) (x₃ <:: firstSorted) (x₄ s:: proofSorted) refl refl = {!!}
+
 {-
 wordst+c<wordsl : ∀ (l : 𝕃 char)
-                    (c : char)
-                    (t : Trie (l ++ c :: []))
-                    (linkc : Link l)
-                    (lnks : 𝕃 (Link (l)))
-                    (firstSorted : linkc ≤* lnks)
-                    (proofSorted : IsSorted lnks)
+                    → (c : char)
+                    → (t : Trie (l ++ c :: []))
+                    → (linkc : Link l)
+                    → (lnks : 𝕃 (Link (l)))
+                    → (firstSorted : linkc ≤* lnks)
+                    → (proofSorted : IsSorted lnks)
                     → (wordst (l ++ c :: []) t) listwords≤listwords (wordsl l lnks proofSorted) ≡ tt
 {-
 wordst+c<wordsl [] c (node tt children x) (link c₁ child) [] <[] s[] = refl
@@ -490,8 +526,8 @@ wordst+c<wordsl (x :: l) c (node tt children x₂) (link c₁ child) (x₁ :: ln
 wordst+c<wordsl (x :: l) c (node ff children x₂) (link c₁ child) (x₁ :: lnks) (x₃ <:: firstSorted) (x₄ s:: proofSorted) = {!!}
 -}
 
-wordst+c<wordsl [] c (node wordp children x) (link c₁ child) [] <[] s[] rewrite anything-goes[] (wordst (c :: []) (node wordp children x)) = refl
-wordst+c<wordsl [] c (node tt [] s[]) (link c2 child) (first-link :: lnks) (x₂ <:: firstSorted) (x₃ s:: proofSorted) = {!!}
+wordst+c<wordsl [] c (node wordp children x) (link c1 child) [] <[] s[] rewrite anything-goes[] (wordst (c :: []) (node wordp children x)) = refl
+wordst+c<wordsl [] c (node tt [] s[]) (link c1 child) (first-link :: lnks) (x₂ <:: firstSorted) (x₃ s:: proofSorted) = {!!}
 wordst+c<wordsl [] c (node tt (x₄ :: children) (x₁ s:: x₅)) (link c₁ child) (x :: lnks) (x₂ <:: firstSorted) (x₃ s:: proofSorted) = {!!}
 wordst+c<wordsl [] c (node ff children x₁) (link c₁ child) (x :: lnks) (x₂ <:: firstSorted) (x₃ s:: proofSorted) = {!!}
 wordst+c<wordsl (x :: l) c (node wordp children x₁) (link c₁ child) [] <[] s[] rewrite anything-goes[] (wordst (x :: l ++ c :: []) (node wordp children x₁)) = refl
@@ -529,17 +565,8 @@ wordst-is-sorted (x :: l) (node tt (link1 :: children) (firstp s:: restp)) rewri
 wordst-is-sorted (x :: l) (node ff (link1 :: children) (firstp s:: restp)) = wordsl-is-sorted (x :: l) (link1 :: children) (firstp s:: restp)
 
 wordsl-is-sorted [] [] s[] = refl
-wordsl-is-sorted [] (link c child :: lnk) (first s:: restp) = {!!}
-  where
-  wordst+c<wordsl : ∀ (l : 𝕃 char)
-                    -- (c : char)
-                    (t : Trie (l ++ c :: []))
-                    (linkc : Link l)
-                    (lnks : 𝕃 (Link (l)))
-                    (firstSorted : linkc ≤* lnks)
-                    (proofSorted : IsSorted lnks)
-                    → (wordst (l ++ c :: []) t) listwords≤listwords (wordsl l lnks proofSorted) ≡ tt
-  wordst+c<wordsl l t linkc lnks firstSorted proofSorted = {!!}
+wordsl-is-sorted [] (link c child :: lnk) (first s:: restp) =  lstring1<lstring2-sort {wordst (c :: []) child} {wordsl [] lnk restp} (wordst+c<wordsl [] c child (link c child) lnk first restp refl refl) (wordst-is-sorted (c :: []) child) (wordsl-is-sorted [] lnk restp)
+
 
 {-
   wordst+c<wordsl [] (node wordp children x) (link c₁ child) [] <[] s[] rewrite anything-goes[] (wordst (c :: []) (node wordp children x)) = refl
@@ -561,7 +588,9 @@ wordsl-is-sorted [] (link c child :: lnk) (first s:: restp) = {!!}
 
 {- lstring1<lstring2-sort {wordst (c :: []) child} {wordsl [] lnk restp} (wordst+c<wordsl [] c child lnk restp) (wordst-is-sorted (c :: []) child) (wordsl-is-sorted [] lnk restp) -}-- write a lemma about the append and the behavior on list is sorted
 wordsl-is-sorted (x :: l) [] s[] = refl
-wordsl-is-sorted (x :: l) (link c child :: rest-lnks) (firstp s:: restp) = {!!}
+wordsl-is-sorted (x :: l) (link c child :: rest-lnks) (firstp s:: restp) = lstring1<lstring2-sort {wordst (x :: l ++ c :: []) child} {wordsl (x :: l) rest-lnks restp} (wordst+c<wordsl (x :: l) c child (link c child) rest-lnks firstp restp refl refl) (wordst-is-sorted (x :: l ++ c :: []) child) (wordsl-is-sorted (x :: l) rest-lnks restp)
+
+{-
   where
   wordst+c<wordsl : ∀ (l : 𝕃 char)
                     -- (c : char)
@@ -572,6 +601,8 @@ wordsl-is-sorted (x :: l) (link c child :: rest-lnks) (firstp s:: restp) = {!!}
                     (proofSorted : IsSorted lnks)
                     → (wordst (l ++ c :: []) t) listwords≤listwords (wordsl l lnks proofSorted) ≡ tt
   wordst+c<wordsl = {!!}
+-}
+
 
 {- lstring1<lstring2-sort {wordst (x :: l ++ c :: []) child} {wordsl (x :: l) rest-lnks restp} (wordst+c<wordsl (x :: l) c child (link c child) rest-lnks firstp restp) (wordst-is-sorted (x :: l ++ c :: []) child) (wordsl-is-sorted (x :: l) rest-lnks restp) -}
 
