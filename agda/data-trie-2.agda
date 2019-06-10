@@ -587,7 +587,10 @@ rest-prefix : ∀ (prefix first-word : 𝕃 char)
               → (rest-words : 𝕃 (𝕃 char))
               → (every-string-starts-with (first-word :: rest-words) prefix) ≡ tt
               → (every-string-starts-with (rest-words) prefix) ≡ tt
-rest-prefix = {!!}
+rest-prefix [] first-word [] p = refl
+rest-prefix (x :: prefix) first-word [] p = refl
+rest-prefix [] first-word (rest-words :: rest-words₁) p = refl
+rest-prefix (x :: prefix) first-word (rest-words :: rest-words₁) p = &&-snd {string-starts-with first-word (x :: prefix)} {string-starts-with rest-words (x :: prefix) && every-string-starts-with rest-words₁ (x :: prefix)} p
 
 
 {-
