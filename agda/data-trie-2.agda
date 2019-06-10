@@ -508,6 +508,10 @@ every-string-[] : (l : 𝕃 (𝕃 char)) → every-string-starts-with l [] ≡ t
 every-string-[] [] = refl
 every-string-[] (l :: l₁) = refl
 
+starts-with-[] : (l : 𝕃 char) → string-starts-with l [] ≡ tt
+starts-with-[] [] = refl
+starts-with-[] (x :: l) = refl
+
 string-starts-with-itself : (l : (𝕃 char)) → string-starts-with l l ≡ tt
 string-starts-with-itself [] = refl
 string-starts-with-itself (x :: l) rewrite char-refl x | string-starts-with-itself l = refl
@@ -747,7 +751,9 @@ starts-with-prefix (x :: prefix) (y :: first-word) ssw
 
 -- =char2-to-≡ {x₁} {x} (&&-fst p)
 
--- -string-starts-with++=strting-starts-with
+string-starts-with++=string-starts-with : ∀ (prefix rest : 𝕃 char) → string-starts-with (prefix ++ rest) prefix ≡ tt
+string-starts-with++=string-starts-with [] rest = starts-with-[] rest  
+string-starts-with++=string-starts-with (x :: prefix) rest rewrite char-refl x = string-starts-with++=string-starts-with prefix rest
 
 
 match-upper-and-lower : ∀ (c1 c2 : char)
@@ -763,7 +769,7 @@ match-upper-and-lower c1 c2 l1 (w1 :: w2) [] c1<c2 w1prefix l1<w2 = refl
 match-upper-and-lower c1 c2 l1 (fw1 :: rw1) (fw2 :: rw2) c1<c2 w1prefix l1<w2
   rewrite match-upper-and-lower c1 c2 l1 rw1 (fw2 :: rw2) c1<c2 (rest-prefix (l1 ++ c1 :: []) fw1 rw1 w1prefix) l1<w2
   | starts-with-prefix (l1 ++ c1 :: []) fw1 (every-string-to-one-string (l1 ++ c1 :: []) fw1 rw1 w1prefix)
-  | one-time-case l1 c1 c2 c1<c2 (nthTail (length (l1 ++ c1 :: [])) fw1) (fw2 :: rw2) {!!} (stringc1≤stringc2 l1 c1 c2 c1<c2) l1<w2 = refl
+  | one-time-case l1 c1 c2 c1<c2 (nthTail (length (l1 ++ c1 :: [])) fw1) (fw2 :: rw2) (string-starts-with++=string-starts-with (l1 ++ c1 :: []) (nthTail (length(l1 ++ c1 :: [])) fw1)) (stringc1≤stringc2 l1 c1 c2 c1<c2) l1<w2 = refl
 
 {-
 
