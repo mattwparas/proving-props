@@ -316,19 +316,18 @@ helper-string≤lemma (x :: l) c proof rewrite &&-fst { (x =char2 x) } { =string
 <string-trans (x :: l1) [] (x₁ :: l3) ()
 <string-trans (x :: l1) (x₁ :: l2) [] l1<l2 ()
 <string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 = {!!}
-
-{- 
+{-
 with (x =char2 z) && (l1 string≤ l3)
 <string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | tt rewrite ||-tt (primCharToNat x < primCharToNat z) = refl
 <string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | ff with keep (x <char3 y) | keep ((x =char2 y) && (l1 string≤ l2)) | keep (y <char3 z) | keep ((y =char2 z) && (l2 string≤ l3))
 <string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | ff | tt , p1 | tt , p2 | tt , p3 | _ , p4 rewrite <char-trans {x} {y} {z} p1 p3 = refl
-<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | ff | tt , p1 | ff , p2 | tt , p3 | tt , p4 = {!!}
+<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | ff | tt , p1 | ff , p2 | tt , p3 | tt , p4 rewrite p1 | p2 | p3 | p4 = {!!}
 <string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | ff | tt , p1 | tt , p2 | ff , p3 | tt , p4 rewrite p1 | p2 | p3 | p4 | <char=-trans {x} {y} {z} p1 (&&-fst {primCharToNat y =ℕ primCharToNat z} {l2 string≤ l3} p4) = refl
 -- <string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | ff | tt , p1 | tt , p2 | tt , p3 | ff , p4 = {!!}
-<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | ff | tt , p1 | ff , p2 | ff , p3 | tt , p4 = {!!}
-<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | ff | tt , p1 | tt , p2 | ff , p3 | ff , p4 = {!!}
-<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | ff | tt , p1 | ff , p2 | tt , p3 | ff , p4 = {!!}
-<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | ff | tt , p1 | ff , p2 | ff , p3 | ff , p4 = {!!}
+<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | ff | tt , p1 | ff , p2 | ff , p3 | tt , p4 rewrite p1 | p2 | p3 | p4 = {!!}
+<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 () | ff | tt , p1 | tt , p2 | ff , p3 | ff , p4 rewrite p1 | p2 | p3 | p4 
+<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | ff | tt , p1 | ff , p2 | tt , p3 | ff , p4 rewrite p1 | p2 | p3 | p4 = {!!}
+<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 () | ff | tt , p1 | ff , p2 | ff , p3 | ff , p4 rewrite p1 | p2 | p3 | p4
 <string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | ff | ff , p1 | tt , p2 | tt , p3 | tt , p4 = {!!}
 <string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | ff | ff , p1 | ff , p2 | tt , p3 | tt , p4 = {!!}
 <string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | ff | ff , p1 | tt , p2 | ff , p3 | tt , p4 = {!!}
@@ -336,9 +335,8 @@ with (x =char2 z) && (l1 string≤ l3)
 <string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | ff | ff , p1 | ff , p2 | ff , p3 | tt , p4 = {!!}
 <string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | ff | ff , p1 | tt , p2 | ff , p3 | ff , p4 = {!!}
 <string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | ff | ff , p1 | ff , p2 | tt , p3 | ff , p4 = {!!}
-<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | ff | ff , p1 | ff , p2 | ff , p3 | ff , p4 rewrite p1 | p2 | p3 | p4 = {!!}
+<string-trans (x :: l1) (y :: l2) (z :: l3) () () | ff | ff , p1 | ff , p2 | ff , p3 | ff , p4 rewrite p1 | p2 | p3 | p4
 -}
-
 
 {-
 
@@ -573,7 +571,159 @@ prefix-lemma-l (x :: l) (link c child :: lst) (x₂ s:: sortp) =  every-string-s
 
 
 
-   
+first-prefix : ∀ (prefix first-word : 𝕃 char)
+               → (rest-words : 𝕃 (𝕃 char))
+               → (every-string-starts-with (first-word :: rest-words) prefix) ≡ tt
+               → (prefix string≤ first-word) ≡ tt
+first-prefix [] [] rest-words p = refl
+first-prefix [] (x :: first-word) rest-words p = refl
+first-prefix (x :: prefix) [] rest-words p = p
+first-prefix (x :: prefix) (x₁ :: first-word) rest-words p = {!!}
+
+rest-prefix : ∀ (prefix first-word : 𝕃 char)
+              → (rest-words : 𝕃 (𝕃 char))
+              → (every-string-starts-with (first-word :: rest-words) prefix) ≡ tt
+              → (every-string-starts-with (rest-words) prefix) ≡ tt
+rest-prefix = {!!}
+
+
+string-starts-with-to-< : ∀ (prefix word : 𝕃 char)
+                          → (string-starts-with word prefix) ≡ tt
+                          → (prefix string≤ word) ≡ tt
+string-starts-with-to-< prefix word p = {!!}
+
+
+--string-to-char< : ∀ (prefix : 𝕃 char) → (c1 c2 : char) → (prefix ++ c1 :: []) string≤ (prefix ++ c2 :: []) ≡ tt → c1 <char3 c2 ≡ tt
+
+
+word<prefix2 : ∀ (prefix1 rest-word : 𝕃 char)
+                 (c1 c2 : char)
+               → (c1 <char3 c2 ≡ tt)
+               → ((prefix1 ++ c1 :: []) string≤ (prefix1 ++ c2 :: []) ≡ tt)
+               → (string-starts-with (prefix1 ++ c1 :: [] ++ rest-word) (prefix1 ++ c1 :: []) ≡ tt)
+               → ((prefix1 ++ c1 :: []) ++ rest-word) string≤ (prefix1 ++ c2 :: []) ≡ tt
+word<prefix2 = {!!}
+
+{-
+word<prefix2 [] [] c1 c2 p1<p2 sswp1 = refl
+word<prefix2 [] (x :: word) c1 c2 p1<p2 sswp1
+  rewrite =char2-to-≡ {x} {c1} (&&-fst {x =char2 c1} {string-starts-with word []} sswp1) = {!!}
+word<prefix2 (x :: prefix) [] c1 c2 p1<p2 sswp1 = refl
+word<prefix2 (x :: prefix) (x₁ :: word) c1 c2 p1<p2 sswp1 = {!!}
+-}
+
+string-list-comm : ∀ (l1 l2 : 𝕃 char) (rhs : 𝕃 (𝕃 char)) → ((l1 ++ l2) string≤list rhs) ≡ tt → (l1 string≤list rhs) ≡ tt
+string-list-comm l1 l2 rhs p = {!!}
+
+
+
+
+one-time-case : ∀ (prefix1 : 𝕃 char)
+                → (c1 c2 : char)
+                → (c1 <char3 c2 ≡ tt)
+                → (p1word-rest : 𝕃 char)
+                → (right-hand-list : 𝕃 (𝕃 char))
+                → (string-starts-with ((prefix1 ++ c1 :: []) ++ p1word-rest) (prefix1 ++ c1 :: []) ≡ tt)
+                → ((prefix1 ++ c1 :: []) string≤ (prefix1 ++ c2 :: [])) ≡ tt
+                → ((prefix1 ++ c2 :: []) string≤list right-hand-list ≡ tt)
+                → ((prefix1 ++ c1 :: []) ++ p1word-rest) string≤list right-hand-list ≡ tt
+one-time-case prefix1 c1 c2 c1<c2 p1word-rest rhs p1-starts-prefix1 p1<p2 p2<rhs = {!!}
+
+{- trans-string≤list p1word (prefix1 ++ c2 :: []) rhs (word<prefix2 prefix1 p1word c1 c2 c1<c2 p1<p2 p1-starts-prefix1) p2<rhs -}
+
+
+-- word<prefix2 prefix1 p1word c1 c2 p1<p2 p1-starts-prefix1 ----------> (p1word string≤ (prefix1 ++ c2 :: [])) ≡ tt
+
+
+every-string-to-one-string : ∀ (prefix first-word : 𝕃 char)
+                               → (rest-words : 𝕃 (𝕃 char))
+                               → (every-string-starts-with (first-word :: rest-words) prefix) ≡ tt
+                               → (string-starts-with first-word prefix) ≡ tt
+every-string-to-one-string = {!!}
+
+{-
+
+string-starts-to-something-else : ∀ (prefix first-word : 𝕃 char) → (rest-words : 𝕃 (𝕃 char)) → every-string-starts-with (first-word :: rest-words) prefix ≡ tt → 𝕃 char
+string-starts-to-something-else prefix first-word rest-word p1 = {!!}
+
+-}
+
+{-
+
+get-rest-word : ∀ (word prefix : 𝕃 char) → string-starts-with word prefix ≡ tt → 𝕃 char
+get-rest-word word [] p = word
+get-rest-word [] (x :: prefix) ()
+get-rest-word (x :: word) (y :: prefix) p = get-rest-word word prefix (&&-snd p)
+
+-- 
+{-
+get-rest-word (x₁ :: word) (x :: prefix) p | tt = get-rest-word word prefix (&&-snd p) 
+get-rest-word (x₁ :: word) (x :: prefix) () | ff
+-}
+
+{-
+get-rest-word-with-c : ∀ (c1 : char) (word prefix : 𝕃 char) → string-starts-with (c1 :: word) (c1 :: prefix) ≡ tt → 𝕃 char
+get-rest-word-with-c c1 [] [] p = {!!}
+get-rest-word-with-c c1 [] (x :: prefix) ()
+get-rest-word-with-c c1 (x :: word) [] p = {!!}
+get-rest-word-with-c c1 (x :: word) (x₁ :: prefix) p = {!!}
+-}
+
+
+get-rest-test : ∀ (word prefix : 𝕃 char) → string-starts-with word prefix ≡ tt → 𝕃 char
+get-rest-test word prefix p = nthTail (length prefix) word
+
+
+get-rest-empty : (ssw : string-starts-with [] [] ≡ tt) → get-rest-test [] [] ssw ≡ []
+get-rest-empty p = refl
+
+-- get-rest-word word prefix (&&-snd {x₁ =char2 x} {string-starts-with word prefix} p)
+
+
+test-starts-with : string-starts-with (string-to-𝕃char "applesauce") (string-to-𝕃char "apple") ≡ tt
+test-starts-with = refl
+
+
+
+
+
+string-starts-with-to-c : ∀ (c1 c2 : char) → (l1 l2 : 𝕃 char) → string-starts-with (c1 :: l1) (c2 :: l2) ≡ tt → c1 ≡ c2
+string-starts-with-to-c c1 c2 l1 l2 p = =char2-to-≡ {c1} {c2} (&&-fst {c1 =char2 c2} {string-starts-with l1 l2} p)
+
+-}
+
+starts-with-prefix : ∀ (prefix first-word : 𝕃 char)
+                       → (ssw : string-starts-with first-word prefix ≡ tt)
+                       → (first-word) ≡ (prefix ++ (nthTail (length prefix) first-word))
+starts-with-prefix [] [] ssw = refl
+starts-with-prefix [] (x :: first-word) ssw = refl
+starts-with-prefix (x :: prefix) [] ()
+starts-with-prefix (x :: prefix) (y :: first-word) ssw
+  rewrite =char2-to-≡ {y} {x} (&&-fst {y =char2 x} {string-starts-with first-word prefix} ssw)
+  | sym (starts-with-prefix prefix first-word (&&-snd ssw)) = refl
+
+
+--  | starts-with-prefix prefix first-word (&&-snd ssw)
+
+-- =char2-to-≡ {y} {x} (&&-fst {y =char2 x} {string-starts-with first-word prefix} ssw
+
+
+--test-starts-with-prefix : starts-with-prefix (string-to-𝕃char "apple") (string-to-𝕃char "applesauce")  test-starts-with 
+--test-starts-with-prefix = ?
+
+
+
+{-
+  rewrite starts-with-prefix l prefix first-word (&&-snd p) same
+  | =char2-to-≡ {x₁} {x} (&&-fst {x₁ =char2 x} {string-starts-with first-word prefix} p) = {!!}
+-}
+
+--  starts-with-prefix l prefix first-word (&&-snd p) same
+
+-- =char2-to-≡ {x₁} {x} (&&-fst p)
+
+-- -string-starts-with++=strting-starts-with
+
 
 match-upper-and-lower : ∀ (c1 c2 : char)
                         (l1 : 𝕃 char)
@@ -582,10 +732,54 @@ match-upper-and-lower : ∀ (c1 c2 : char)
                         → every-string-starts-with w1 (l1 ++ c1 :: []) ≡ tt
                         → (l1 ++ c2 :: []) string≤list w2 ≡ tt
                         → w1 listwords≤listwords w2 ≡ tt
-match-upper-and-lower c1 c2 l1 w1 w2 c1<c2 w1prefix l1<w2 = {!!}
+match-upper-and-lower c1 c2 l1 [] [] c1<c2 w1prefix l1<w2 = refl
+match-upper-and-lower c1 c2 l1 [] (w2 :: w3) c1<c2 w1prefix l1<w2 = refl
+match-upper-and-lower c1 c2 l1 (w1 :: w2) [] c1<c2 w1prefix l1<w2 = refl
+match-upper-and-lower c1 c2 l1 (fw1 :: rw1) (fw2 :: rw2) c1<c2 w1prefix l1<w2
+  rewrite match-upper-and-lower c1 c2 l1 rw1 (fw2 :: rw2) c1<c2 (rest-prefix (l1 ++ c1 :: []) fw1 rw1 w1prefix) l1<w2
+  | starts-with-prefix (l1 ++ c1 :: []) fw1 (every-string-to-one-string (l1 ++ c1 :: []) fw1 rw1 w1prefix)
+  | one-time-case l1 c1 c2 c1<c2 (nthTail (length (l1 ++ c1 :: [])) fw1) (fw2 :: rw2) {!!} (stringc1≤stringc2 l1 c1 c2 c1<c2) l1<w2 = refl
+
+{-
+
+one-time-case l1 c1 c2 c1<c2 (nthTail (length (l1 ++ c1 :: [])) fw1) (get-rest-word fw1 (l1 ++ c1 :: []) ((every-string-to-one-string (l1 ++ c1 :: []) fw1 rw1 w1prefix)) (fw2 :: rw2) {!!} ((stringc1≤stringc2 l1 c1 c2 c1<c2)) l1<w2
+
+  |  starts-with-prefix (l1 ++ c1 :: []) fw1 (every-string-to-one-string (l1 ++ c1 :: []) fw1 rw1 w1prefix)
+  | one-time-case l1 c1 c2 c1<c2 (get-rest-word fw1 (l1 ++ c1 :: []) ((every-string-to-one-string (l1 ++ c1 :: []) fw1 rw1 w1prefix))) (fw2 :: rw2) {!!} ((stringc1≤stringc2 l1 c1 c2 c1<c2)) l1<w2 = {!!}
+-}
 
 
+{-
 
+  | starts-with-prefix (l1 ++ c1 :: []) fw1 (every-string-to-one-string (l1 ++ c1 :: []) fw1 rw1 w1prefix)
+  | string-list-++ (l1 ++ c1 :: []) (get-rest-word fw1 (l1 ++ c1 :: []) (every-string-to-one-string (l1 ++ c1 :: []) fw1 rw1 w1prefix)) (fw2 :: rw2)
+  | trans-string≤list (l1 ++ c1 :: []) (l1 ++ c2 :: []) (fw2 :: rw2) (stringc1≤stringc2 l1 c1 c2 c1<c2) l1<w2 = refl
+
+-}
+
+-- (every-string-to-one-string (l1 ++ c1 :: []) fw1 rw1 w1prefix)
+
+-- one-time-case l1 c1 c2 c1<c2 (get-rest-word fw1 (l1 ++ c1 :: []) (? (l1 ++ c1 :: []) fw1 rw1 w1prefix)) (fw2 :: rw2)
+
+-- string-list-comm (l1 ++ c1 :: []) (get-rest-word fw1 (l1 ++ c1 :: []) (? (l1 ++ c1 :: []) fw1 rw1 w1prefix)) (fw2 :: rw2)
+
+--  one-time-case l1 c1 c2 c1<c2 fw1 (fw2 :: rw2) (every-string-to-one-string (l1 ++ c1 :: []) fw1 rw1 w1prefix) (stringc1≤stringc2 l1 c1 c2 c1<c2) l1<w2 = refl
+
+                      {-
+  | one-time-case (l1) c1 c2 fw1 (fw2 :: rw2) (every-string-to-one-string (l1 ++ c1 :: []) fw1 rw1 w1prefix) (stringc1≤stringc2 l1 c1 c2 c1<c2) (trans-string≤list (l1 ++ c1 :: []) (l1 ++ c2 :: []) (fw2 :: rw2) (stringc1≤stringc2 l1 c1 c2 c1<c2) l1<w2) = refl
+-}
+
+-- ((l1 ++ c1 :: []) string≤list (fw2 :: rw2)) ≡ tt -------- trans-string≤list (l1 ++ c1 :: []) (l1 ++ c2 :: []) (fw2 :: rw2) (stringc1≤stringc2 l1 c1 c2 c1<c2) l1<w2
+
+-- ((l1 ++ c1 :: []) string≤ fw1) ≡ tt ---------------- first-prefix (l1 ++ c1 :: []) fw1 rw1 w1prefix
+
+-- trans-string≤list (l1 ++ c1 :: []) fw1 (fw2 :: rw2) 
+
+-- trans-string≤list (fw1) (l1 ++ c2 :: []) (fw2 :: rw2) 
+
+-- first-prefix (l1 ++ c1 :: []) fw1 rw1 w1prefix
+
+-- (fw1 string≤ (l1 ++ c1 :: [])) ≡ tt
 
 upper-bound-wordst : ∀ (c1 c2 : char)
                        (s1 : 𝕃 char)
