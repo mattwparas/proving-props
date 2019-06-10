@@ -304,6 +304,10 @@ helper-string≤lemma (x :: l) c proof rewrite &&-fst { (x =char2 x) } { =string
 <char=-trans {c1} {c2} {c3} p1 p2 rewrite char-refl c2 | =ℕ-to-≡ {primCharToNat c2} {primCharToNat c3} p2 = p1
 
 
+string≤-refl : ∀ (l1 : 𝕃 char) → l1 string≤ l1 ≡ tt
+string≤-refl [] = refl
+string≤-refl (x :: l1) rewrite char-refl x | string≤-refl l1 | ||-tt (primCharToNat x < primCharToNat x) = refl
+
 -- this is just a goddamn mess honestly
 -- idk why its so difficult
 
@@ -464,7 +468,10 @@ trans-string≤list [] (x :: l2) (lstring :: lstring₁) p1 p2 = refl
 trans-string≤list (x :: l1) [] [] ()
 trans-string≤list (x :: l1) [] (lstring :: lstring₁) ()
 trans-string≤list (x :: l1) (x₁ :: l2) [] p1 p2 = refl
-trans-string≤list (x :: l1) (x₁ :: l2) (lstring :: lstring₁) p1 p2 = {!!}
+trans-string≤list (x :: l1) (x₁ :: l2) (lstring :: lstring₁) p1 p2
+  rewrite <string-trans (x :: l1) (x₁ :: l2) lstring p1 (&&-fst p2) = trans-string≤list (x :: l1) (x₁ :: l2) lstring₁ p1 (&&-snd p2)
+
+
 
 stringc1≤stringc2 : ∀ (l : 𝕃 char) (c1 c2 : char) → c1 <char3 c2 ≡ tt → (l ++ c1 :: []) string≤ (l ++ c2 :: []) ≡ tt
 stringc1≤stringc2 [] c1 c2 c1<c2 rewrite c1<c2 = refl
@@ -577,9 +584,7 @@ rest-prefix (x :: prefix) first-word (rest-words :: rest-words₁) p = &&-snd {s
 
 
 
-string≤-refl : ∀ (l1 : 𝕃 char) → l1 string≤ l1 ≡ tt
-string≤-refl [] = refl
-string≤-refl (x :: l1) rewrite char-refl x | string≤-refl l1 | ||-tt (primCharToNat x < primCharToNat x) = refl
+
 
 
 less-than-self : ∀ (l1 l2 : 𝕃 char) → l1 string≤ (l1 ++ l2) ≡ tt
