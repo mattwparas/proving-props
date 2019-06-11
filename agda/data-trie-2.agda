@@ -21,6 +21,9 @@ open import level
 
 
 
+
+
+
 ----------------------------------------------------------------------
 -- primitive operations
 ----------------------------------------------------------------------
@@ -119,6 +122,28 @@ _listwords≤listwords_ (x :: l1) (y :: l2) =
 =string-refl : ∀ (l : 𝕃 char) → (=string l l) ≡ tt
 =string-refl [] = refl
 =string-refl (x :: l) rewrite char-refl (x) = (=string-refl l)
+
+
+string≤list-fst : ∀ {w1 w2 : 𝕃 char} {lst : 𝕃 (𝕃 char)}
+                  → w1 string≤list (w2 :: lst) ≡ tt
+                  → w1 string≤ w2 ≡ tt
+string≤list-fst {[]} {[]} {lst} p = refl
+string≤list-fst {[]} {x :: w2} {lst} p = refl
+string≤list-fst {x :: w1} {[]} {lst} ()
+string≤list-fst {x :: w1} {y :: w2} {[]} p
+  rewrite  (&&-tt (x =char2 y && w1 string≤ w2))
+           | &&-tt ((primCharToNat x < primCharToNat y || primCharToNat x =ℕ primCharToNat y && (w1 string≤ w2))) = p
+string≤list-fst {x :: w1} {y :: w2} {lst :: rest} p
+  rewrite (&&-fst {x <char3 y || (x =char2 y) && (w1 string≤ w2)}
+                  {((x :: w1) string≤ lst) && ((x :: w1) string≤list rest)} p) = refl
+
+
+firstlistwords≤ : ∀ {l1 l2 : 𝕃 (𝕃 char)}
+                    {w1 w2 : 𝕃 char}
+                    → (w1 :: l1) listwords≤listwords (w2 :: l2) ≡ tt
+                    → w1 string≤ w2 ≡ tt
+firstlistwords≤ {l1} {l2} {w1} {w2} p1 =
+  string≤list-fst {w1} {w2} {l2} (&&-fst {w1 string≤list (w2 :: l2)} {l1 listwords≤listwords (w2 :: l2)} p1)
 
 
 ----------------------------------------------------------------------
@@ -847,11 +872,6 @@ t3 = node ff
 --t4 = node ff ((link 'b'
 --  (node tt [] s[])) :: (link 'a' (node tt [] s[])) :: []) (({!!} <:: {!!} {{!!}} {{!!}}) s:: {!!})
 
--- insert
-{-
-trie-insert : Trie []
-trie-insert = insert ('a' :: []) t0
--}
 
 -- wordst
 wordst-test0 : wordst [] t0 ≡ []
@@ -873,23 +893,7 @@ wordst-sorted-output-test = refl
 link-list-to-chars-test : link-list-to-chars {[]} t3 ≡ ('a' :: 'o' :: [])
 link-list-to-chars-test = refl
 
-----------------------------------------------------------------------
--- helpful for later?
-----------------------------------------------------------------------
 
 
-{- this isn't needed I think
-string≤list-fst : ∀ {w1 w2 : 𝕃 char} {lst : 𝕃 (𝕃 char)} → w1 string≤list (w2 :: lst) ≡ tt → w1 string≤ w2 ≡ tt
-string≤list-fst {[]} {[]} {lst} p = refl
-string≤list-fst {[]} {x :: w2} {lst} p = refl
-string≤list-fst {x :: w1} {[]} {lst} ()
-string≤list-fst {x :: w1} {y :: w2} {[]} p rewrite  (&&-tt (x =char2 y && w1 string≤ w2)) | &&-tt ((primCharToNat x < primCharToNat y || primCharToNat x =ℕ primCharToNat y && (w1 string≤ w2))) = p
-string≤list-fst {x :: w1} {y :: w2} {lst :: rest} p rewrite (&&-fst {x <char3 y || (x =char2 y) && (w1 string≤ w2)} {((x :: w1) string≤ lst) && ((x :: w1) string≤list rest)} p) = refl
-
-
--- this is also not needed I think
-firstlistwords≤ : ∀ {l1 l2 : 𝕃 (𝕃 char)} {w1 w2 : 𝕃 char} → (w1 :: l1) listwords≤listwords (w2 :: l2) ≡ tt → w1 string≤ w2 ≡ tt
-firstlistwords≤ {l1} {l2} {w1} {w2} p1 = string≤list-fst {w1} {w2} {l2} (&&-fst {w1 string≤list (w2 :: l2)} {l1 listwords≤listwords (w2 :: l2)} p1)
--}
 
 
