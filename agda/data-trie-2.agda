@@ -1,5 +1,3 @@
--- module Agda.Builtin.Char
-
 open import char
 open import maybe
 open import string
@@ -18,8 +16,6 @@ open import empty
 open import list
 open import list-thms
 open import level
-
-
 
 
 
