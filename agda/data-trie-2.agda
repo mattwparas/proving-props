@@ -473,10 +473,11 @@ string-starts-with+c : ∀ (prefix : 𝕃 char)
 string-starts-with+c [] c [] p = refl
 string-starts-with+c [] c (x :: word) p = refl
 string-starts-with+c (x :: prefix) c [] p = p
-string-starts-with+c (x :: prefix) c (x₁ :: word) p rewrite &&-fst {(x₁ =char2 x)}
-                                                                   {string-starts-with word (prefix ++ c :: [])} p = string-starts-with+c prefix c word
-                                                                                                                                                 (&&-snd {(x₁ =char2 x)}
-                                                                                                                                                         {string-starts-with word (prefix ++ c :: [])} p) 
+string-starts-with+c (x :: prefix) c (x₁ :: word) p
+  rewrite &&-fst {(x₁ =char2 x)}
+                 {string-starts-with word (prefix ++ c :: [])} p = string-starts-with+c prefix c word
+                                                                                        (&&-snd {(x₁ =char2 x)}
+                                                                                                {string-starts-with word (prefix ++ c :: [])} p) 
 
 
 every-string-starts-with+c : ∀ (prefix : 𝕃 char)
@@ -487,16 +488,13 @@ every-string-starts-with+c : ∀ (prefix : 𝕃 char)
 every-string-starts-with+c [] c [] proof = refl
 every-string-starts-with+c [] c (lst :: lst₁) proof = refl
 every-string-starts-with+c (x :: prefix) c [] proof = refl
-every-string-starts-with+c (x :: prefix) c (lst :: rest) proof rewrite every-string-starts-with+c (x :: prefix)
-                                                                                                  c rest
-                                                                                                  (&&-snd {string-starts-with lst (x :: prefix ++ c :: [])}
-                                                                                                          {every-string-starts-with rest (x :: prefix ++ c :: [])} proof)
-                                                                       | string-starts-with+c (x :: prefix)
-                                                                                               c lst
-                                                                                               ((&&-fst
-                                                                                                 {string-starts-with
-                                                                                                   lst (x :: prefix ++ c :: [])}
-                                                                                                   {every-string-starts-with rest (x :: prefix ++ c :: [])} proof)) = refl
+every-string-starts-with+c (x :: prefix) c (lst :: rest) proof
+  rewrite every-string-starts-with+c (x :: prefix)
+                                           c rest
+                                             (&&-snd {string-starts-with lst (x :: prefix ++ c :: [])}
+                                                     {every-string-starts-with rest (x :: prefix ++ c :: [])} proof)
+          | string-starts-with+c (x :: prefix) c lst ((&&-fst {string-starts-with lst (x :: prefix ++ c :: [])}
+                                                              {every-string-starts-with rest (x :: prefix ++ c :: [])} proof)) = refl
 
 
 prefix-lemma-t : ∀ (l : 𝕃 char) → (t : Trie l) → every-string-starts-with (wordst l t) l ≡ tt
