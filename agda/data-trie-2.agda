@@ -303,13 +303,15 @@ helper-string≤lemma (x :: l) c proof rewrite &&-fst { (x =char2 x) } { =string
 <char=-trans : ∀ {c1 c2 c3 : char} → c1 <char3 c2 ≡ tt → c2 =char2 c3 ≡ tt → c1 <char3 c3 ≡ tt
 <char=-trans {c1} {c2} {c3} p1 p2 rewrite char-refl c2 | =ℕ-to-≡ {primCharToNat c2} {primCharToNat c3} p2 = p1
 
+<char=-trans2 : ∀ {c1 c2 c3 : char} → c1 =char2 c2 ≡ tt → c2 <char3 c3 ≡ tt → c1 <char3 c3 ≡ tt
+<char=-trans2 {c1} {c2} {c3} p1 p2 rewrite char-refl c1 | =ℕ-to-≡ {primCharToNat c1} {primCharToNat c2} p1 = p2
+
 
 string≤-refl : ∀ (l1 : 𝕃 char) → l1 string≤ l1 ≡ tt
 string≤-refl [] = refl
 string≤-refl (x :: l1) rewrite char-refl x | string≤-refl l1 | ||-tt (primCharToNat x < primCharToNat x) = refl
 
--- this is just a goddamn mess honestly
--- idk why its so difficult
+
 
 <string-trans : ∀ (l1 l2 l3 : 𝕃 char) → l1 string≤ l2 ≡ tt → l2 string≤ l3 ≡ tt → l1 string≤ l3 ≡ tt
 <string-trans [] [] [] l1<l2 l2<l3 = refl
@@ -319,7 +321,13 @@ string≤-refl (x :: l1) rewrite char-refl x | string≤-refl l1 | ||-tt (primCh
 <string-trans (x :: l1) [] [] ()
 <string-trans (x :: l1) [] (x₁ :: l3) ()
 <string-trans (x :: l1) (x₁ :: l2) [] l1<l2 ()
-<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 = {!!}
+<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 with keep (x <char3 y) | keep (y <char3 z)
+<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | tt , x<y | tt , y<z rewrite <char-trans {x} {y} {z} x<y y<z = refl
+<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | tt , x<y | ff , y>z rewrite y>z | <char=-trans {x} {y} {z} x<y (&&-fst l2<l3) = refl
+<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | ff , x>y | tt , y<z rewrite x>y | <char=-trans2 {x} {y} {z} (&&-fst l1<l2) y<z = refl  
+<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | ff , x>y | ff , y>z rewrite x>y | y>z | =char-trans {x} {y} {z} (&&-fst l1<l2) (&&-fst l2<l3)
+                                                                                                | (<string-trans l1 l2 l3 (&&-snd l1<l2) (&&-snd l2<l3))
+                                                                                                | ||-tt (primCharToNat x < primCharToNat z)= refl
 {-
 with (x =char2 z) && (l1 string≤ l3)
 <string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | tt rewrite ||-tt (primCharToNat x < primCharToNat z) = refl
