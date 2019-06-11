@@ -53,6 +53,7 @@ list-of-chars-sorted [] = tt
 list-of-chars-sorted (x :: []) = tt
 list-of-chars-sorted (x :: y :: l) = (x <char3 y) && list-of-chars-sorted (y :: l)
 
+{- char is equal to itself -}
 char-refl : ∀ (c : char) → (c =char2 c) ≡ tt
 char-refl c = =ℕ-refl (primCharToNat c)
 
@@ -79,7 +80,7 @@ _string≤list_ (x :: comp-string) (first-string :: rest-strings) =
     && ((x :: comp-string) string≤list rest-strings)
 
 
-
+{- given list of strings are upper bounded by another string -}
 _list≤string_ : 𝕃 (𝕃 char) → 𝕃 char → 𝔹
 _list≤string_ [] [] = tt
 _list≤string_ [] (first-char :: rest-chars) = tt
@@ -196,7 +197,8 @@ empty-string≤ : ∀ (lst : 𝕃 (𝕃 char)) → [] string≤list lst ≡ tt
 empty-string≤ [] = refl
 empty-string≤ (lst :: lst₁) = refl
 
-{- for any two words and any two chars, if consing the chars to each list respectively leads to two equal strings, the characters are then equal -}
+{- for any two words and any two chars, if consing the chars to each list respectively leads to two 
+   equal strings, the characters are then equal -}
 lemma-char : ∀ (l1 l2 : 𝕃 char) (c1 c2 : char) → =string (c1 :: l1) (c2 :: l2) ≡ tt → c1 =char2 c2 ≡ tt
 lemma-char l1 l2 c1 c2 eqs = (&&-fst eqs)
 
@@ -209,13 +211,14 @@ string=-gives-≤ (x :: l1) (y :: l2) l1=l2 rewrite lemma-char l1 l2 x y l1=l2
                                                    | (string=-gives-≤ l1 l2 (&&-snd l1=l2))
                                                    | ||-tt ((primCharToNat x) < (primCharToNat y)) = refl
 
+{- string is equal to itself -}
 string-equality : ∀ (l : 𝕃 char) → l string≤ l ≡ tt
 string-equality [] = refl
 string-equality (x :: l) rewrite char-refl (x)
                                  | string-equality l
                                  | ||-tt ((primCharToNat x) < (primCharToNat x)) = refl
                                  
-
+{- stub -} 
 string≤firstword-list : ∀ (l1 l2 : 𝕃 char)
                           (stringList : 𝕃 (𝕃 char))
                           → (l1 string≤ l2) && (l1 string≤list stringList) ≡ tt
@@ -229,7 +232,7 @@ string≤firstword-list (x :: l1) [] (stringList :: stringList₁) ()
 string≤firstword-list (x :: l1) (x₁ :: l2) [] proof = proof
 string≤firstword-list (x :: l1) (x₁ :: l2) (stringList :: stringList₁) proof = proof
 
-
+{- stub -}
 string≤list-comm : ∀ (l : 𝕃 char)
                      (l1 l2 : 𝕃 (𝕃 char))
                      → l string≤list l1 ≡ tt
@@ -247,7 +250,7 @@ string≤list-comm (x :: l) (firstString :: lchars2) (secondString :: lchars4) l
         = string≤list-comm (x :: l) lchars2 (secondString :: lchars4) (&&-snd {(x :: l) string≤ firstString}
         {(x :: l) string≤list lchars2} l<l1)  (string≤firstword-list (x :: l) secondString lchars4 l<l2)
 
-
+{- stub -}
 helper-string≤lemma : ∀ (l : 𝕃 char)
                         (c : char)
                         → =string l l ≡ tt
@@ -258,29 +261,32 @@ helper-string≤lemma (x :: l) c proof
           | (helper-string≤lemma l c (=string-refl l))
           | ||-tt (primCharToNat x < primCharToNat x) = refl
 
+{- =char2 transitivity -}
 =char-trans : ∀ {c1 c2 c3 : char} → c1 =char2 c2 ≡ tt → c2 =char2 c3 ≡ tt → c1 =char2 c3 ≡ tt
 =char-trans {c1} {c2} {c3} p1 p2 rewrite
   =ℕ-to-≡ {primCharToNat c1} {primCharToNat c2} p1
   | =ℕ-to-≡ {primCharToNat c2} {primCharToNat c3} p2 = =ℕ-refl (primCharToNat c3)
 
 
-
+{- <char transitivity -}
 <char-trans : ∀ {c1 c2 c3 : char} → c1 <char3 c2 ≡ tt → c2 <char3 c3 ≡ tt → c1 <char3 c3 ≡ tt
 <char-trans {c1} {c2} {c3} p1 p2 = <-trans {primCharToNat c1} {primCharToNat c2} {primCharToNat c3} p1 p2
 
+{- <char with an equality second -}
 <char=-trans : ∀ {c1 c2 c3 : char} → c1 <char3 c2 ≡ tt → c2 =char2 c3 ≡ tt → c1 <char3 c3 ≡ tt
 <char=-trans {c1} {c2} {c3} p1 p2 rewrite char-refl c2 | =ℕ-to-≡ {primCharToNat c2} {primCharToNat c3} p2 = p1
 
+{- <char with an equality first -}
 <char=-trans2 : ∀ {c1 c2 c3 : char} → c1 =char2 c2 ≡ tt → c2 <char3 c3 ≡ tt → c1 <char3 c3 ≡ tt
 <char=-trans2 {c1} {c2} {c3} p1 p2 rewrite char-refl c1 | =ℕ-to-≡ {primCharToNat c1} {primCharToNat c2} p1 = p2
 
-
+{- string is ≤ to iself -}
 string≤-refl : ∀ (l1 : 𝕃 char) → l1 string≤ l1 ≡ tt
 string≤-refl [] = refl
 string≤-refl (x :: l1) rewrite char-refl x | string≤-refl l1 | ||-tt (primCharToNat x < primCharToNat x) = refl
 
 
-
+{- ≤ string transitivity -} 
 <string-trans : ∀ (l1 l2 l3 : 𝕃 char) → l1 string≤ l2 ≡ tt → l2 string≤ l3 ≡ tt → l1 string≤ l3 ≡ tt
 <string-trans [] [] [] l1<l2 l2<l3 = refl
 <string-trans [] [] (x :: l3) l1<l2 l2<l3 = refl
@@ -297,6 +303,7 @@ string≤-refl (x :: l1) rewrite char-refl x | string≤-refl l1 | ||-tt (primCh
                                       | (<string-trans l1 l2 l3 (&&-snd l1<l2) (&&-snd l2<l3))
                                       | ||-tt (primCharToNat x < primCharToNat z) = refl
 
+{- a string is less than (itself ++ character) -}
 string≤string+c2 : ∀ (l1 : 𝕃 char) (c : char) → l1 string≤ (l1 ++ c :: []) ≡ tt
 string≤string+c2 [] c = refl
 string≤string+c2 (x :: l) c
@@ -330,8 +337,9 @@ helper-lemma (x :: l) [] l<lst = refl
 helper-lemma (x :: l) (first :: rest) l<lst rewrite l<lst = refl
 
 
+{- the output of wordst is lower bounded by l -}
 output-wordst : ∀ (l : 𝕃 char) (t : Trie l) → l string≤list (wordst l t) ≡ tt
-
+{- the output of wordsl is lower bounded by l -}
 output-wordsl : ∀ (l : 𝕃 char) (lst : 𝕃 (Link l)) → (sortProof : IsSorted lst)
                                                     → l string≤list (wordsl l lst sortProof) ≡ tt
 
@@ -355,32 +363,32 @@ output-wordsl (x :: l) (link c child :: rest-link) (curr s:: sortproof) =
       (output-wordsl (x :: l) rest-link sortproof)
 
 
-
+{- empty list of words is less than anything -}
 []anything-goes : ∀ (l : 𝕃 (𝕃 char)) → [] listwords≤listwords l ≡ tt
 []anything-goes [] = refl
 []anything-goes (l :: l₁) = refl
 
-
+{- l is less than empty list of words -}
 anything-goes[] : ∀ (l : 𝕃 (𝕃 char)) → l listwords≤listwords [] ≡ tt
 anything-goes[] [] = refl
 anything-goes[] (l :: l₁) = refl
 
-
+{- have to postulate this, we know this is true its fine -}
 postulate
   char-same : ∀ (x y : char) → primCharToNat x ≡ primCharToNat y → x ≡ y
 
-
+{- convert from =char2 to equality -}
 =char2-to-≡ : ∀ {c1 c2 : char} → c1 =char2 c2 ≡ tt → c1 ≡ c2
 =char2-to-≡ {c1} {c2} p = char-same c1 c2 (=ℕ-to-≡ {primCharToNat c1} {primCharToNat c2} p)
 
 
-
+{- function to return the character embedded in a link -}
 get-c : ∀ (l : 𝕃 char)
            → (linkc : Link l)
            → char
 get-c l (link c child) = c
 
-
+{- function to return the trie defined by (l ++ c :: []) embedded in a link -}
 get-t : ∀ (l : 𝕃 char)
            → (linkc : Link l)
            → (c : char)
@@ -407,7 +415,8 @@ trans-string≤list (x :: l1) (x₁ :: l2) (lstring :: lstring₁) p1 p2
     = trans-string≤list (x :: l1) (x₁ :: l2) lstring₁ p1 (&&-snd p2)
 
 
-
+{- two strings with a shared prefix l, one ++ c1 and ther other ++ c2, then l1 < l2
+   Essentially an extension of c1 < c2 when the prefixes are the same -}
 stringc1≤stringc2 : ∀ (l : 𝕃 char)
                       (c1 c2 : char)
                       → c1 <char3 c2 ≡ tt
@@ -420,6 +429,7 @@ stringc1≤stringc2 (x :: l) c1 c2 c1<c2
           | ||-tt (primCharToNat x < primCharToNat x) = refl
 
 
+{- a tighter proof than before with output-wordsl- this says wordsl is lowerbounded by the c located in the first link -}
 output-wordsl+c : ∀ (l : 𝕃 char)
                   → (c : char)
                   → (first-link : Link l)
@@ -438,7 +448,7 @@ output-wordsl+c l c (link .c (node wordp children x₂)) (link c₁ child :: lst
       (trans-string≤list (l ++ c :: []) (l ++ c₁ :: []) (wordsl l (link c₁ child :: lst) sortProof)
         (stringc1≤stringc2 l c c₁ x) (output-wordsl+c l c₁ (link c₁ child) lst sortProof refl))
 
-
+{- function to state if a string contains the given prefix -}
 string-starts-with : (𝕃 char) → (𝕃 char) → 𝔹
 string-starts-with [] [] = tt
 string-starts-with [] (x :: prefix) = ff
@@ -446,6 +456,7 @@ string-starts-with (x :: comp-string) [] = tt
 string-starts-with (x :: comp-string) (y :: prefix) =
   (x =char2 y) && (string-starts-with comp-string prefix)
 
+{- function to state if all of the lists of strings contains the given prefix -}
 every-string-starts-with : (𝕃 (𝕃 char)) → 𝕃 char → 𝔹
 every-string-starts-with [] [] = tt
 every-string-starts-with [] (x :: str) = tt
@@ -454,9 +465,11 @@ every-string-starts-with (first :: rest) (char :: str) =
   (string-starts-with first (char :: str)) && (every-string-starts-with rest (char :: str))
 
 
+{- identity : every string starts with empty prefix -} 
 every-string-[] : (l : 𝕃 (𝕃 char)) → every-string-starts-with l [] ≡ tt
 every-string-[] [] = refl
 every-string-[] (l :: l₁) = refl
+
 
 starts-with-[] : (l : 𝕃 char) → string-starts-with l [] ≡ tt
 starts-with-[] [] = refl
