@@ -290,12 +290,12 @@ string≤-refl (x :: l1) rewrite char-refl x | string≤-refl l1 | ||-tt (primCh
 <string-trans (x :: l1) [] (x₁ :: l3) ()
 <string-trans (x :: l1) (x₁ :: l2) [] l1<l2 ()
 <string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 with keep (x <char3 y) | keep (y <char3 z)
-<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | tt , x<y | tt , y<z rewrite <char-trans {x} {y} {z} x<y y<z = refl
-<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | tt , x<y | ff , y>z rewrite y>z | <char=-trans {x} {y} {z} x<y (&&-fst l2<l3) = refl
-<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | ff , x>y | tt , y<z rewrite x>y | <char=-trans2 {x} {y} {z} (&&-fst l1<l2) y<z = refl  
-<string-trans (x :: l1) (y :: l2) (z :: l3) l1<l2 l2<l3 | ff , x>y | ff , y>z rewrite x>y | y>z | =char-trans {x} {y} {z} (&&-fst l1<l2) (&&-fst l2<l3)
-                                                                                                | (<string-trans l1 l2 l3 (&&-snd l1<l2) (&&-snd l2<l3))
-                                                                                                | ||-tt (primCharToNat x < primCharToNat z)= refl
+... | tt , x<y | tt , y<z rewrite <char-trans {x} {y} {z} x<y y<z = refl
+... | tt , x<y | ff , y>z rewrite y>z | <char=-trans {x} {y} {z} x<y (&&-fst l2<l3) = refl
+... | ff , x>y | tt , y<z rewrite x>y | <char=-trans2 {x} {y} {z} (&&-fst l1<l2) y<z = refl  
+... | ff , x>y | ff , y>z rewrite x>y | y>z | =char-trans {x} {y} {z} (&&-fst l1<l2) (&&-fst l2<l3)
+                                      | (<string-trans l1 l2 l3 (&&-snd l1<l2) (&&-snd l2<l3))
+                                      | ||-tt (primCharToNat x < primCharToNat z) = refl
 
 string≤string+c2 : ∀ (l1 : 𝕃 char) (c : char) → l1 string≤ (l1 ++ c :: []) ≡ tt
 string≤string+c2 [] c = refl
@@ -332,7 +332,8 @@ helper-lemma (x :: l) (first :: rest) l<lst rewrite l<lst = refl
 
 output-wordst : ∀ (l : 𝕃 char) (t : Trie l) → l string≤list (wordst l t) ≡ tt
 
-output-wordsl : ∀ (l : 𝕃 char) (lst : 𝕃 (Link l)) → (sortProof : IsSorted lst) → l string≤list (wordsl l lst sortProof) ≡ tt
+output-wordsl : ∀ (l : 𝕃 char) (lst : 𝕃 (Link l)) → (sortProof : IsSorted lst)
+                                                    → l string≤list (wordsl l lst sortProof) ≡ tt
 
 
 output-wordst [] (node wordp children is-sorted) = empty-string≤ (wordst [] (node wordp children is-sorted))
