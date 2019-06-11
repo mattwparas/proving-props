@@ -74,7 +74,9 @@ _string≤list_ : 𝕃 char → 𝕃 (𝕃 char) → 𝔹
 _string≤list_ [] [] = tt
 _string≤list_ [] (first-string :: rest-strings) = tt
 _string≤list_ (x :: comp-string) [] = tt
-_string≤list_ (x :: comp-string) (first-string :: rest-strings) = ((x :: comp-string) string≤ first-string) && ((x :: comp-string) string≤list rest-strings)
+_string≤list_ (x :: comp-string) (first-string :: rest-strings) =
+  ((x :: comp-string) string≤ first-string)
+    && ((x :: comp-string) string≤list rest-strings)
 
 
 
@@ -82,12 +84,15 @@ _list≤string_ : 𝕃 (𝕃 char) → 𝕃 char → 𝔹
 _list≤string_ [] [] = tt
 _list≤string_ [] (first-char :: rest-chars) = tt
 _list≤string_ (first-string :: rest-strings) [] = tt
-_list≤string_ (first-string :: rest-strings) (first-char :: rest-chars) = (first-string string≤ (first-char :: rest-chars)) && (rest-strings list≤string (first-char :: rest-chars))
+_list≤string_ (first-string :: rest-strings) (first-char :: rest-chars) =
+  (first-string string≤ (first-char :: rest-chars))
+    && (rest-strings list≤string (first-char :: rest-chars))
 
 {- Given list of strings, see if the list of strings is in the right order -}
 list-is-sorted : 𝕃 (𝕃 char) → 𝔹
 list-is-sorted [] = tt
-list-is-sorted (first-string :: rest-of-words)  = (first-string string≤list rest-of-words) && (list-is-sorted rest-of-words)
+list-is-sorted (first-string :: rest-of-words) =
+  (first-string string≤list rest-of-words) && (list-is-sorted rest-of-words)
 
 
 {- Given two lists of characters (string representations), 
@@ -98,7 +103,8 @@ _listwords≤listwords_ : 𝕃 (𝕃 char) → 𝕃 (𝕃 char) → 𝔹
 _listwords≤listwords_ [] [] = tt
 _listwords≤listwords_ [] (y :: l3) = tt
 _listwords≤listwords_ (x :: l2) [] = tt
-_listwords≤listwords_ (x :: l1) (y :: l2) = (x string≤list (y :: l2)) && (l1 listwords≤listwords (y :: l2))
+_listwords≤listwords_ (x :: l1) (y :: l2) =
+  (x string≤list (y :: l2)) && (l1 listwords≤listwords (y :: l2))
 
 
 
@@ -173,7 +179,8 @@ wordsl l (link c child :: lt) (x s:: proof) = (wordst (l ++ (c :: [])) child) ++
 {- takes a list of links and returns a list of their associated characters -}
 link-list-to-chars : ∀ {l : 𝕃 char} → Trie l → 𝕃 char
 link-list-to-chars {l} (node wordp [] x) = []
-link-list-to-chars {l} (node wordp (link c child :: children) (x s:: other)) = (c :: (link-list-to-chars {l} (node wordp children other)))
+link-list-to-chars {l} (node wordp (link c child :: children) (x s:: other)) =
+  (c :: (link-list-to-chars {l} (node wordp children other)))
 
 ----------------------------------------------------------------------
 -- Sorting definitions
@@ -209,7 +216,10 @@ string-equality (x :: l) rewrite char-refl (x)
                                  | ||-tt ((primCharToNat x) < (primCharToNat x)) = refl
                                  
 
-string≤firstword-list : ∀ (l1 l2 : 𝕃 char) (stringList : 𝕃 (𝕃 char)) → (l1 string≤ l2) && (l1 string≤list stringList) ≡ tt → l1 string≤list (l2 :: stringList) ≡ tt
+string≤firstword-list : ∀ (l1 l2 : 𝕃 char)
+                          (stringList : 𝕃 (𝕃 char))
+                          → (l1 string≤ l2) && (l1 string≤list stringList) ≡ tt
+                          → l1 string≤list (l2 :: stringList) ≡ tt
 string≤firstword-list [] [] [] proof = refl
 string≤firstword-list [] [] (stringList :: stringList₁) proof = refl
 string≤firstword-list [] (x :: l2) [] proof = refl
@@ -220,7 +230,11 @@ string≤firstword-list (x :: l1) (x₁ :: l2) [] proof = proof
 string≤firstword-list (x :: l1) (x₁ :: l2) (stringList :: stringList₁) proof = proof
 
 
-string≤list-comm : ∀ (l : 𝕃 char) (l1 l2 : 𝕃 (𝕃 char)) → l string≤list l1 ≡ tt → l string≤list l2 ≡ tt → l string≤list (l1 ++ l2) ≡ tt
+string≤list-comm : ∀ (l : 𝕃 char)
+                     (l1 l2 : 𝕃 (𝕃 char))
+                     → l string≤list l1 ≡ tt
+                     → l string≤list l2 ≡ tt
+                     → l string≤list (l1 ++ l2) ≡ tt
 string≤list-comm [] [] [] l<l1 l<l2 = refl
 string≤list-comm (x :: l) [] [] l<l1 l<l2 = refl
 string≤list-comm [] [] (lchars2 :: lchars3) l<l1 l<l2 = refl
@@ -234,7 +248,10 @@ string≤list-comm (x :: l) (firstString :: lchars2) (secondString :: lchars4) l
         {(x :: l) string≤list lchars2} l<l1)  (string≤firstword-list (x :: l) secondString lchars4 l<l2)
 
 
-helper-string≤lemma : ∀ (l : 𝕃 char) (c : char) → =string l l ≡ tt → l string≤ (l ++ c :: []) ≡ tt
+helper-string≤lemma : ∀ (l : 𝕃 char)
+                        (c : char)
+                        → =string l l ≡ tt
+                        → l string≤ (l ++ c :: []) ≡ tt
 helper-string≤lemma [] c proof = refl
 helper-string≤lemma (x :: l) c proof
   rewrite &&-fst { (x =char2 x) } { =string l l } proof
