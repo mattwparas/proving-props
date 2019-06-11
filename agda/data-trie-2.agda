@@ -470,11 +470,12 @@ every-string-[] : (l : 𝕃 (𝕃 char)) → every-string-starts-with l [] ≡ t
 every-string-[] [] = refl
 every-string-[] (l :: l₁) = refl
 
-
+{- every string starts with empty -} 
 starts-with-[] : (l : 𝕃 char) → string-starts-with l [] ≡ tt
 starts-with-[] [] = refl
 starts-with-[] (x :: l) = refl
 
+{- a string by definition starts with itself -}
 string-starts-with-itself : (l : (𝕃 char)) → string-starts-with l l ≡ tt
 string-starts-with-itself [] = refl
 string-starts-with-itself (x :: l)
@@ -527,11 +528,12 @@ every-string-starts-with+c (x :: prefix) c (lst :: rest) proof
                                    {string-starts-with lst (x :: prefix ++ c :: [])}
                                    {every-string-starts-with rest (x :: prefix ++ c :: [])} proof)) = refl
 
-
+{- every word below a node in a trie contains the given prefix -}
 prefix-lemma-t : ∀ (l : 𝕃 char)
                    → (t : Trie l)
                    → every-string-starts-with (wordst l t) l ≡ tt
-
+                   
+{- every word below a link in a trie contains the given prefix -}
 prefix-lemma-l : ∀ (l : 𝕃 char)
                    (lst : 𝕃 (Link l))
                    → (sortProof : IsSorted lst)
@@ -586,7 +588,7 @@ less-than-self (x :: l1) (x₁ :: l2)
           | (less-than-self l1 (x₁ :: l2))
           | ||-tt (primCharToNat x < primCharToNat x) = refl
 
-
+{- a character can't be less than itself -}
 char<char : ∀ (c : char) → c <char3 c ≡ ff
 char<char c = <-irrefl (primCharToNat c)
 
@@ -616,6 +618,7 @@ one-time-case prefix1 c1 c2 c1<c2 p1word-rest rhs p1-starts-prefix1 p1<p2 p2<rhs
                     rhs (prefix+stuff (prefix1) p1word-rest c1 c2 c1<c2 p1<p2) p2<rhs  
 
 
+{- if every string in a list starts with a prefix, the first word does too -}
 every-string-to-one-string : ∀ (prefix first-word : 𝕃 char)
                                → (rest-words : 𝕃 (𝕃 char))
                                → (every-string-starts-with (first-word :: rest-words) prefix) ≡ tt
@@ -626,7 +629,7 @@ every-string-to-one-string [] first-word (rest-words :: rest-words₁) p = start
 every-string-to-one-string (x :: prefix) first-word (rest-words :: rest-words₁) p = &&-fst p 
 
 
-
+{- if a string starts with a prefix, then the string is equal to the prefix ++ 'the rest' -}
 starts-with-prefix : ∀ (prefix first-word : 𝕃 char)
                        → (ssw : string-starts-with first-word prefix ≡ tt)
                        → (first-word) ≡ (prefix ++ (nthTail (length prefix) first-word))
@@ -639,14 +642,14 @@ starts-with-prefix (x :: prefix) (y :: first-word) ssw
 
 
 
-
+{- a word defined by prefix ++ junk starts with prefix -}
 string-starts-with++=string-starts-with : ∀ (prefix rest : 𝕃 char)
                                           → string-starts-with (prefix ++ rest) prefix ≡ tt
 string-starts-with++=string-starts-with [] rest = starts-with-[] rest  
 string-starts-with++=string-starts-with (x :: prefix) rest
   rewrite char-refl x = string-starts-with++=string-starts-with prefix rest
 
-
+{- unite the upper and lower bounds for proving listwords≤listwords -}
 match-upper-and-lower : ∀ (c1 c2 : char)
                         (l1 : 𝕃 char)
                         (w1 w2 : 𝕃 (𝕃 char))
@@ -668,7 +671,7 @@ match-upper-and-lower c1 c2 l1 (fw1 :: rw1) (fw2 :: rw2) c1<c2 w1prefix l1<w2
                      (stringc1≤stringc2 l1 c1 c2 c1<c2) l1<w2 = refl
 
 
-
+{- wrapper with match upper and lower for ease of use (?) -}
 upper-bound-wordst : ∀ (c1 c2 : char)
                        (s1 : 𝕃 char)
                        → (t : Trie (s1 ++ c1 :: []))
@@ -688,6 +691,7 @@ upper-bound-wordst c1 c2 s1 t (link .c1 .t) (link .c2 child₁) lstlnks sortedPr
                                  (output-wordsl+c s1 c2 (link c2 child₁) lstlnks sortedProof refl)
 
 
+{- show that the output of wordst + c is less than wordsl when the first link of links contains a c1 > c -}
 wordst+c<wordsl : ∀ (l : 𝕃 char)
        → (c : char)
        → (t : Trie (l ++ c :: []))
@@ -703,6 +707,7 @@ wordst+c<wordsl l c t (link .c .t) (link c1 child :: lnks) (fst<sortp <:: firstS
   upper-bound-wordst c c1 l t (link c t) (link c1 child) lnks (x<restlnks s:: proofSorted) fst<sortp refl refl refl
 
 
+{- sorting identity -}
 lstring1<lstring2-sort : ∀ {l1 l2 : 𝕃 (𝕃 char)}
                            → l1 listwords≤listwords l2 ≡ tt
                            → list-is-sorted l1 ≡ tt
@@ -721,10 +726,13 @@ lstring1<lstring2-sort {f1 :: l1} {f2 :: l2} l1<l2 l1sort l2sort rewrite
 
 --- #### main #### ---
 
+
+{- output of wordst is in sorted order -}
 wordst-is-sorted : ∀ (l : 𝕃 char)
                      (t : Trie l)
                      → list-is-sorted (wordst l t) ≡ tt
 
+{- output of wordsl is in sorted order -}
 wordsl-is-sorted : ∀ (l : 𝕃 char)
                      (lst : 𝕃 (Link l))
                      (sortproof : IsSorted lst)
