@@ -390,7 +390,11 @@ get-t l (link c2 child) c p rewrite sym p = child
 
 
 
-trans-string≤list : ∀ (l1 l2 : 𝕃 char) (lstring : 𝕃 (𝕃 char)) → l1 string≤ l2 ≡ tt → l2 string≤list lstring ≡ tt → l1 string≤list lstring ≡ tt
+trans-string≤list : ∀ (l1 l2 : 𝕃 char)
+                      (lstring : 𝕃 (𝕃 char))
+                      → l1 string≤ l2 ≡ tt
+                      → l2 string≤list lstring ≡ tt
+                      → l1 string≤list lstring ≡ tt
 trans-string≤list [] [] [] p1 p2 = refl
 trans-string≤list [] [] (lstring :: lstring₁) p1 p2 = refl
 trans-string≤list [] (x :: l2) [] p1 p2 = refl
@@ -399,13 +403,21 @@ trans-string≤list (x :: l1) [] [] ()
 trans-string≤list (x :: l1) [] (lstring :: lstring₁) ()
 trans-string≤list (x :: l1) (x₁ :: l2) [] p1 p2 = refl
 trans-string≤list (x :: l1) (x₁ :: l2) (lstring :: lstring₁) p1 p2
-  rewrite <string-trans (x :: l1) (x₁ :: l2) lstring p1 (&&-fst p2) = trans-string≤list (x :: l1) (x₁ :: l2) lstring₁ p1 (&&-snd p2)
+  rewrite <string-trans (x :: l1) (x₁ :: l2) lstring p1 (&&-fst p2)
+    = trans-string≤list (x :: l1) (x₁ :: l2) lstring₁ p1 (&&-snd p2)
 
 
 
-stringc1≤stringc2 : ∀ (l : 𝕃 char) (c1 c2 : char) → c1 <char3 c2 ≡ tt → (l ++ c1 :: []) string≤ (l ++ c2 :: []) ≡ tt
+stringc1≤stringc2 : ∀ (l : 𝕃 char)
+                      (c1 c2 : char)
+                      → c1 <char3 c2 ≡ tt
+                      → (l ++ c1 :: []) string≤ (l ++ c2 :: []) ≡ tt
 stringc1≤stringc2 [] c1 c2 c1<c2 rewrite c1<c2 = refl
-stringc1≤stringc2 (x :: l) c1 c2 c1<c2 rewrite c1<c2 | char-refl x | stringc1≤stringc2 l c1 c2 c1<c2 | ||-tt (primCharToNat x < primCharToNat x) = refl
+stringc1≤stringc2 (x :: l) c1 c2 c1<c2
+  rewrite c1<c2
+          | char-refl x
+          | stringc1≤stringc2 l c1 c2 c1<c2
+          | ||-tt (primCharToNat x < primCharToNat x) = refl
 
 
 output-wordsl+c : ∀ (l : 𝕃 char)
@@ -431,13 +443,15 @@ string-starts-with : (𝕃 char) → (𝕃 char) → 𝔹
 string-starts-with [] [] = tt
 string-starts-with [] (x :: prefix) = ff
 string-starts-with (x :: comp-string) [] = tt
-string-starts-with (x :: comp-string) (y :: prefix) = (x =char2 y) && (string-starts-with comp-string prefix)
+string-starts-with (x :: comp-string) (y :: prefix) =
+  (x =char2 y) && (string-starts-with comp-string prefix)
 
 every-string-starts-with : (𝕃 (𝕃 char)) → 𝕃 char → 𝔹
 every-string-starts-with [] [] = tt
 every-string-starts-with [] (x :: str) = tt
 every-string-starts-with (lst :: lst₁) [] = tt
-every-string-starts-with (first :: rest) (char :: str) = (string-starts-with first (char :: str)) && (every-string-starts-with rest (char :: str))
+every-string-starts-with (first :: rest) (char :: str) =
+  (string-starts-with first (char :: str)) && (every-string-starts-with rest (char :: str))
 
 
 every-string-[] : (l : 𝕃 (𝕃 char)) → every-string-starts-with l [] ≡ tt
@@ -450,7 +464,9 @@ starts-with-[] (x :: l) = refl
 
 string-starts-with-itself : (l : (𝕃 char)) → string-starts-with l l ≡ tt
 string-starts-with-itself [] = refl
-string-starts-with-itself (x :: l) rewrite char-refl x | string-starts-with-itself l = refl
+string-starts-with-itself (x :: l)
+  rewrite char-refl x
+          | string-starts-with-itself l = refl
 
 
 every-string-starts-with-comm : ∀ (prefix : 𝕃 char)
@@ -477,10 +493,8 @@ string-starts-with+c [] c [] p = refl
 string-starts-with+c [] c (x :: word) p = refl
 string-starts-with+c (x :: prefix) c [] p = p
 string-starts-with+c (x :: prefix) c (x₁ :: word) p
-  rewrite &&-fst {(x₁ =char2 x)}
-                 {string-starts-with word (prefix ++ c :: [])} p = string-starts-with+c prefix c word
-                                                                                        (&&-snd {(x₁ =char2 x)}
-                                                                                                {string-starts-with word (prefix ++ c :: [])} p) 
+  rewrite &&-fst {(x₁ =char2 x)} {string-starts-with word (prefix ++ c :: [])} p
+    = string-starts-with+c prefix c word (&&-snd {(x₁ =char2 x)} {string-starts-with word (prefix ++ c :: [])} p) 
 
 
 every-string-starts-with+c : ∀ (prefix : 𝕃 char)
@@ -492,17 +506,23 @@ every-string-starts-with+c [] c [] proof = refl
 every-string-starts-with+c [] c (lst :: lst₁) proof = refl
 every-string-starts-with+c (x :: prefix) c [] proof = refl
 every-string-starts-with+c (x :: prefix) c (lst :: rest) proof
-  rewrite every-string-starts-with+c (x :: prefix)
-                                           c rest
-                                             (&&-snd {string-starts-with lst (x :: prefix ++ c :: [])}
-                                                     {every-string-starts-with rest (x :: prefix ++ c :: [])} proof)
-          | string-starts-with+c (x :: prefix) c lst ((&&-fst {string-starts-with lst (x :: prefix ++ c :: [])}
-                                                              {every-string-starts-with rest (x :: prefix ++ c :: [])} proof)) = refl
+  rewrite every-string-starts-with+c (x :: prefix) c rest
+                                     (&&-snd {string-starts-with lst (x :: prefix ++ c :: [])}
+                                             {every-string-starts-with rest (x :: prefix ++ c :: [])} proof)
+          | string-starts-with+c (x :: prefix) c lst
+                                 ((&&-fst
+                                   {string-starts-with lst (x :: prefix ++ c :: [])}
+                                   {every-string-starts-with rest (x :: prefix ++ c :: [])} proof)) = refl
 
 
-prefix-lemma-t : ∀ (l : 𝕃 char) → (t : Trie l) → every-string-starts-with (wordst l t) l ≡ tt
+prefix-lemma-t : ∀ (l : 𝕃 char)
+                   → (t : Trie l)
+                   → every-string-starts-with (wordst l t) l ≡ tt
 
-prefix-lemma-l : ∀ (l : 𝕃 char) (lst : 𝕃 (Link l)) → (sortProof : IsSorted lst) → every-string-starts-with (wordsl l lst sortProof) l ≡ tt
+prefix-lemma-l : ∀ (l : 𝕃 char)
+                   (lst : 𝕃 (Link l))
+                   → (sortProof : IsSorted lst)
+                   → every-string-starts-with (wordsl l lst sortProof) l ≡ tt
 
 prefix-lemma-t [] (node wordp children x) = every-string-[] (wordst [] (node wordp children x))
 prefix-lemma-t (x :: l) (node tt [] s[]) rewrite char-refl x | string-starts-with-itself l = refl
@@ -513,7 +533,6 @@ prefix-lemma-t (x :: l) (node tt (first-links :: children) (firstp s:: p))
 prefix-lemma-t (x :: l) (node ff (first-links :: children) (firstp s:: p))
   rewrite char-refl x
   | string-starts-with-itself l = prefix-lemma-l (x :: l) (first-links :: children) (firstp s:: p)
-
 
 
 prefix-lemma-l [] [] s[] = refl
@@ -564,7 +583,8 @@ prefix+stuff : ∀ (l1 l2 : 𝕃 char)
                  → (l1 ++ c1 :: []) string≤ (l1 ++ c2 :: []) ≡ tt
                  → ((l1 ++ c1 :: []) ++ l2) string≤ (l1 ++ c2 :: []) ≡ tt
 prefix+stuff [] l2 c1 c2 c1<c2 l1<l2 rewrite c1<c2 = refl
-prefix+stuff (x :: l1) l2 c1 c2 c1<c2 l1<l2 rewrite char-refl x | char<char x = prefix+stuff l1 l2 c1 c2 c1<c2 l1<l2
+prefix+stuff (x :: l1) l2 c1 c2 c1<c2 l1<l2
+  rewrite char-refl x | char<char x = prefix+stuff l1 l2 c1 c2 c1<c2 l1<l2
 
 
 
@@ -625,7 +645,8 @@ match-upper-and-lower c1 c2 l1 [] [] c1<c2 w1prefix l1<w2 = refl
 match-upper-and-lower c1 c2 l1 [] (w2 :: w3) c1<c2 w1prefix l1<w2 = refl
 match-upper-and-lower c1 c2 l1 (w1 :: w2) [] c1<c2 w1prefix l1<w2 = refl
 match-upper-and-lower c1 c2 l1 (fw1 :: rw1) (fw2 :: rw2) c1<c2 w1prefix l1<w2
-  rewrite match-upper-and-lower c1 c2 l1 rw1 (fw2 :: rw2) c1<c2 (rest-prefix (l1 ++ c1 :: []) fw1 rw1 w1prefix) l1<w2
+  rewrite match-upper-and-lower c1 c2 l1 rw1 (fw2 :: rw2) c1<c2
+          (rest-prefix (l1 ++ c1 :: []) fw1 rw1 w1prefix) l1<w2
   | starts-with-prefix (l1 ++ c1 :: []) fw1 (every-string-to-one-string (l1 ++ c1 :: []) fw1 rw1 w1prefix)
   | one-time-case l1 c1 c2 c1<c2
                      (nthTail (length (l1 ++ c1 :: [])) fw1)
@@ -669,7 +690,12 @@ wordst+c<wordsl l c t (link .c .t) (link c1 child :: lnks) (fst<sortp <:: firstS
   upper-bound-wordst c c1 l t (link c t) (link c1 child) lnks (x<restlnks s:: proofSorted) fst<sortp refl refl refl
 
 
-lstring1<lstring2-sort : ∀ {l1 l2 : 𝕃 (𝕃 char)} → l1 listwords≤listwords l2 ≡ tt → list-is-sorted l1 ≡ tt → list-is-sorted l2 ≡ tt → list-is-sorted (l1 ++ l2) ≡ tt
+lstring1<lstring2-sort : ∀ {l1 l2 : 𝕃 (𝕃 char)}
+                           → l1 listwords≤listwords l2 ≡ tt
+                           → list-is-sorted l1 ≡ tt
+                           → list-is-sorted l2 ≡ tt
+                           → list-is-sorted (l1 ++ l2) ≡ tt
+                           
 lstring1<lstring2-sort {[]} {[]} l1<l2 l1sort l2sort = refl
 lstring1<lstring2-sort {[]} {l2 :: l3} l1<l2 l1sort l2sort = l2sort
 lstring1<lstring2-sort {l1 :: l2} {[]} l1<l2 l1sort l2sort rewrite ++[] l2 = l1sort
@@ -682,22 +708,29 @@ lstring1<lstring2-sort {f1 :: l1} {f2 :: l2} l1<l2 l1sort l2sort rewrite
 
 --- #### main #### ---
 
-wordst-is-sorted : ∀ (l : 𝕃 char) (t : Trie l) → list-is-sorted (wordst l t) ≡ tt
+wordst-is-sorted : ∀ (l : 𝕃 char)
+                     (t : Trie l)
+                     → list-is-sorted (wordst l t) ≡ tt
 
-wordsl-is-sorted : ∀ (l : 𝕃 char) (lst : 𝕃 (Link l)) (sortproof : IsSorted lst) → list-is-sorted (wordsl l lst sortproof) ≡ tt
+wordsl-is-sorted : ∀ (l : 𝕃 char)
+                     (lst : 𝕃 (Link l))
+                     (sortproof : IsSorted lst)
+                     → list-is-sorted (wordsl l lst sortproof) ≡ tt
 
 wordst-is-sorted [] (node tt [] s[]) = refl
 wordst-is-sorted [] (node ff [] s[]) = refl
 wordst-is-sorted [] (node tt (link1 :: children) (first s:: rest))
   rewrite cons-empty-sorting (wordsl [] (link1 :: children) (first s:: rest)) =
     wordsl-is-sorted [] (link1 :: children) (first s:: rest)
-wordst-is-sorted [] (node ff (link1 :: children) (first s:: rest)) =  wordsl-is-sorted [] (link1 :: children) (first s:: rest)
+wordst-is-sorted [] (node ff (link1 :: children) (first s:: rest)) =
+  wordsl-is-sorted [] (link1 :: children) (first s:: rest)
 wordst-is-sorted (x :: l) (node tt [] s[]) = refl
 wordst-is-sorted (x :: l) (node ff [] s[]) = refl
 wordst-is-sorted (x :: l) (node tt (link1 :: children) (firstp s:: restp))
   rewrite output-wordsl (x :: l) (link1 :: children) (firstp s:: restp) =
     wordsl-is-sorted (x :: l) (link1 :: children) (firstp s:: restp)
-wordst-is-sorted (x :: l) (node ff (link1 :: children) (firstp s:: restp)) = wordsl-is-sorted (x :: l) (link1 :: children) (firstp s:: restp)
+wordst-is-sorted (x :: l) (node ff (link1 :: children) (firstp s:: restp)) =
+  wordsl-is-sorted (x :: l) (link1 :: children) (firstp s:: restp)
 
 wordsl-is-sorted [] [] s[] = refl
 wordsl-is-sorted [] (link c child :: lnk) (first s:: restp) =
