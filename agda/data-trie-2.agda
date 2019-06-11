@@ -771,14 +771,27 @@ list-is-sorted-test4 = refl
 list-is-sorted-test5 : list-is-sorted ( ('a' :: 'p' :: 'p' :: []) :: ('a' :: 'p' :: 'p' :: 'l' :: 'e' :: []) :: []) ≡ tt
 list-is-sorted-test5 = refl
 
-list-is-sorted-test6 : list-is-sorted ( (string-to-𝕃char "apple") :: (string-to-𝕃char "applied") :: (string-to-𝕃char "devices") :: []) ≡ tt
+list-is-sorted-test6 : list-is-sorted ( (string-to-𝕃char "apple") ::
+                                        (string-to-𝕃char "applied") ::
+                                        (string-to-𝕃char "devices") :: []) ≡ tt
 list-is-sorted-test6 = refl
 
 -- listword≤
-testlistword≤ : ((string-to-𝕃char "apple") :: (string-to-𝕃char "applied") :: (string-to-𝕃char "devices") :: []) listwords≤listwords ((string-to-𝕃char "trying") :: (string-to-𝕃char "wonder") :: (string-to-𝕃char "zebra") :: []) ≡ tt
+testlistword≤ : ((string-to-𝕃char "apple") ::
+                (string-to-𝕃char "applied") ::
+                 (string-to-𝕃char "devices") :: [])
+                                  listwords≤listwords
+                                    ((string-to-𝕃char "trying") ::
+                                    (string-to-𝕃char "wonder") ::
+                                    (string-to-𝕃char "zebra") :: []) ≡ tt
 testlistword≤ = refl
 
-testlistword≤2 : ((string-to-𝕃char "ab") :: (string-to-𝕃char "ac") :: (string-to-𝕃char "ad") :: []) listwords≤listwords ((string-to-𝕃char "aa") :: (string-to-𝕃char "ab") :: []) ≡ ff
+testlistword≤2 : ((string-to-𝕃char "ab") ::
+                  (string-to-𝕃char "ac") ::
+                  (string-to-𝕃char "ad") :: [])
+                    listwords≤listwords
+                      ((string-to-𝕃char "aa") ::
+                       (string-to-𝕃char "ab") :: []) ≡ ff
 testlistword≤2 = refl
 
 -- string≤
@@ -793,7 +806,8 @@ t1 : Trie []
 t1 = node tt [] s[]
 
 t2 : Trie []
-t2 = node ff (link 'a' (node tt [] s[]) :: []) (  <[] { [] } { (link 'a' (node tt [] s[])) } s:: s[])
+t2 = node ff (link 'a' (node tt [] s[]) :: [])
+  (<[] {[]} {(link 'a' (node tt [] s[]))} s:: s[])
 
 t3 : Trie []
 t3 = node ff
@@ -803,7 +817,9 @@ t3 = node ff
     (link 'n'
       (node tt [] s[]) :: [])
         (<[] {'o' :: []} {link 'n' ((node tt [] s[]) )} s:: s[])) :: []))
-        ((refl <:: <[] {[]} {(link 'a' (node tt [] s[]))}) s:: (<[] {[]} {(link 'o' ((node ff ((link 'n' (node tt [] s[])) :: []) (<[] {'o' :: []} {link 'n' ((node tt [] s[]))} s:: s[]))))} s:: s[]))
+        ((refl <:: <[] {[]} {(link 'a' (node tt [] s[]))}) s:: (<[] {[]}
+          {(link 'o' ((node ff ((link 'n' (node tt [] s[])) :: []) (<[]
+          {'o' :: []} {link 'n' ((node tt [] s[]))} s:: s[]))))} s:: s[]))
 
 -- Impossible to make a trie with the children not in order
 --t4 : Trie []
