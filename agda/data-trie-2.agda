@@ -218,7 +218,6 @@ string-equality (x :: l) rewrite char-refl (x)
                                  | string-equality l
                                  | ||-tt ((primCharToNat x) < (primCharToNat x)) = refl
                                  
-{- stub -} 
 string≤firstword-list : ∀ (l1 l2 : 𝕃 char)
                           (stringList : 𝕃 (𝕃 char))
                           → (l1 string≤ l2) && (l1 string≤list stringList) ≡ tt
@@ -232,7 +231,8 @@ string≤firstword-list (x :: l1) [] (stringList :: stringList₁) ()
 string≤firstword-list (x :: l1) (x₁ :: l2) [] proof = proof
 string≤firstword-list (x :: l1) (x₁ :: l2) (stringList :: stringList₁) proof = proof
 
-{- stub -}
+{- if l is less than everything in l1, and everything in l2, then its less than everything in
+   l1 ++ l2-}
 string≤list-comm : ∀ (l : 𝕃 char)
                      (l1 l2 : 𝕃 (𝕃 char))
                      → l string≤list l1 ≡ tt
@@ -250,7 +250,7 @@ string≤list-comm (x :: l) (firstString :: lchars2) (secondString :: lchars4) l
         = string≤list-comm (x :: l) lchars2 (secondString :: lchars4) (&&-snd {(x :: l) string≤ firstString}
         {(x :: l) string≤list lchars2} l<l1)  (string≤firstword-list (x :: l) secondString lchars4 l<l2)
 
-{- stub -}
+{- I think this is proved twice -}
 helper-string≤lemma : ∀ (l : 𝕃 char)
                         (c : char)
                         → =string l l ≡ tt
