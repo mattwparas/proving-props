@@ -21,8 +21,6 @@ open import level
 
 
 
--- {-# BUILTIN CHAR char #-}
-
 ----------------------------------------------------------------------
 -- primitive operations
 ----------------------------------------------------------------------
@@ -37,32 +35,19 @@ private
 -- character definitions
 ----------------------------------------------------------------------
 
-{-
-
-Define built in <= for characters
-
-char to unicode value, compare numbers
-
--}
+{- Define built in <= for characters
+  char to unicode value, compare numbers -}
 _<char2_ : char → char → 𝔹
 _<char2_ c1 c2 = (primCharToNat c1) ≤ (primCharToNat c2)
 
 _<char3_ : char → char → 𝔹
 _<char3_ c1 c2 = (primCharToNat c1) < (primCharToNat c2)
 
-{-
-
-Define built in equality for characters
-
--}
+{- Define built in equality for characters -}
 _=char2_ : char → char → 𝔹
 _=char2_ c1 c2 = (primCharToNat c1) =ℕ (primCharToNat c2)
 
-{-
-
-For a given list of characters (string) see if the list of characters are in order
-
--}
+{- For a given list of characters (string) see if the list of characters are in order -}
 list-of-chars-sorted : 𝕃 char → 𝔹
 list-of-chars-sorted [] = tt
 list-of-chars-sorted (x :: []) = tt
@@ -76,23 +61,15 @@ char-refl c = =ℕ-refl (primCharToNat c)
 -- string definitions
 ----------------------------------------------------------------------
 
-{-
-
-Function that returns true if the l1 <= l2
-
--}
+{- Function that returns true if the l1 <= l2 -}
 _string≤_ : 𝕃 char → 𝕃 char → 𝔹
 _string≤_ [] [] = tt
 _string≤_ [] (x :: string2) = tt -- "" < "a : pple"
 _string≤_ (x :: string1) [] = ff -- "a : pple" < ""
 _string≤_ (x :: string1) (y :: string2) = (x <char3 y) || ((x =char2 y) && (string1 string≤ string2))
 
-{- 
-
-Function that returns a boolean about whether a string is less than all the other string in a list
-Helper for list-is-sorted
-
--}
+{- Function that returns a boolean about whether a string is less than all the other string in a list
+   Helper for list-is-sorted -}
 _string≤list_ : 𝕃 char → 𝕃 (𝕃 char) → 𝔹
 _string≤list_ [] [] = tt
 _string≤list_ [] (first-string :: rest-strings) = tt
@@ -107,22 +84,15 @@ _list≤string_ [] (first-char :: rest-chars) = tt
 _list≤string_ (first-string :: rest-strings) [] = tt
 _list≤string_ (first-string :: rest-strings) (first-char :: rest-chars) = (first-string string≤ (first-char :: rest-chars)) && (rest-strings list≤string (first-char :: rest-chars))
 
-{- 
-
-Given list of strings, see if the list of strings is in the right order
-
--}
+{- Given list of strings, see if the list of strings is in the right order -}
 list-is-sorted : 𝕃 (𝕃 char) → 𝔹
 list-is-sorted [] = tt
 list-is-sorted (first-string :: rest-of-words)  = (first-string string≤list rest-of-words) && (list-is-sorted rest-of-words)
 
-{-
 
-Given two lists of characters (string representations), 
+{- Given two lists of characters (string representations), 
 return true if all the words in l1 are less than l2
-{ Note: Does not say anything about sortedness of the lists }
-
--}
+{ Note: Does not say anything about sortedness of the lists } -}
 
 _listwords≤listwords_ : 𝕃 (𝕃 char) → 𝕃 (𝕃 char) → 𝔹
 _listwords≤listwords_ [] [] = tt
@@ -183,17 +153,6 @@ data IsSorted {l} where
   s[]  : IsSorted []
   _s::_ : ∀ {x xs} → x ≤* xs → IsSorted xs → IsSorted (x :: xs)
 
-
-----------------------------------------------------------------------
--- Insert definitions
-----------------------------------------------------------------------
-
-{-
-insert : 𝕃 char → (t : Trie []) -> Trie []
-insert [] t = t
-insert (x :: []) t = {!!}
-insert (x :: y :: l) t = {!!}
--}
 
 ----------------------------------------------------------------------
 -- Traversal definitions
@@ -257,7 +216,6 @@ string≤firstword-list (x :: l1) [] (stringList :: stringList₁) ()
 string≤firstword-list (x :: l1) (x₁ :: l2) [] proof = proof
 string≤firstword-list (x :: l1) (x₁ :: l2) (stringList :: stringList₁) proof = proof
 
--- string≤list
 
 string≤list-comm : ∀ (l : 𝕃 char) (l1 l2 : 𝕃 (𝕃 char)) → l string≤list l1 ≡ tt → l string≤list l2 ≡ tt → l string≤list (l1 ++ l2) ≡ tt
 string≤list-comm [] [] [] l<l1 l<l2 = refl
@@ -423,7 +381,10 @@ output-wordsl+c : ∀ (l : 𝕃 char)
                   → (l ++ c :: []) string≤list (wordsl l (first-link :: lst) sortProof) ≡ tt
                   
 output-wordsl+c l c (link .c (node wordp children x₁)) [] (x s:: s[]) refl rewrite ++[] (wordst (l ++ c :: []) (node wordp children x₁)) = output-wordst (l ++ c :: []) (node wordp children x₁)
-output-wordsl+c l c (link .c (node wordp children x₂)) (link c₁ child :: lst) ((x <:: x₁) s:: sortProof) refl = string≤list-comm (l ++ c :: []) (wordst (l ++ c :: []) (node wordp children x₂)) (wordsl l (link c₁ child :: lst) sortProof) (output-wordst (l ++ c :: []) (node wordp children x₂)) (trans-string≤list (l ++ c :: []) (l ++ c₁ :: []) (wordsl l (link c₁ child :: lst) sortProof) (stringc1≤stringc2 l c c₁ x) (output-wordsl+c l c₁ (link c₁ child) lst sortProof refl))
+output-wordsl+c l c (link .c (node wordp children x₂)) (link c₁ child :: lst) ((x <:: x₁) s:: sortProof) refl =
+  string≤list-comm (l ++ c :: []) (wordst (l ++ c :: []) (node wordp children x₂)) (wordsl l (link c₁ child :: lst) sortProof)
+    (output-wordst (l ++ c :: []) (node wordp children x₂)) (trans-string≤list (l ++ c :: []) (l ++ c₁ :: []) (wordsl l (link c₁ child :: lst) sortProof)
+      (stringc1≤stringc2 l c c₁ x) (output-wordsl+c l c₁ (link c₁ child) lst sortProof refl))
 
 
 string-starts-with : (𝕃 char) → (𝕃 char) → 𝔹
@@ -462,7 +423,9 @@ every-string-starts-with-comm (x :: prefix) [] [] p1 p2 = refl
 every-string-starts-with-comm (x :: prefix) [] (l2 :: l3) p1 p2 = p2
 every-string-starts-with-comm (x :: prefix) (l1 :: l2) [] p1 p2 rewrite ++[] l2 = p1
 every-string-starts-with-comm (x :: prefix) (fl1 :: rl1) (fl2 :: rl2) p1 p2
-  rewrite &&-fst {string-starts-with fl1 (x :: prefix)} {every-string-starts-with rl1 (x :: prefix)} p1 = every-string-starts-with-comm (x :: prefix) (rl1) (fl2 :: rl2) (&&-snd {string-starts-with fl1 (x :: prefix)} {every-string-starts-with rl1 (x :: prefix)} p1) p2
+  rewrite &&-fst {string-starts-with fl1 (x :: prefix)} {every-string-starts-with rl1 (x :: prefix)} p1 =
+    every-string-starts-with-comm (x :: prefix) (rl1) (fl2 :: rl2)
+      (&&-snd {string-starts-with fl1 (x :: prefix)} {every-string-starts-with rl1 (x :: prefix)} p1) p2
 
 
 string-starts-with+c : ∀ (prefix : 𝕃 char)
